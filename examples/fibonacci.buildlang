@@ -1,0 +1,12 @@
+n=10
+num1 = 0
+num2 = 1
+nextNumber = num2
+count = 1
+
+while count <= n
+    say(nextNumber, " ")
+    // increase is ++ in Java, can specify by how much with an numeral after the variable
+    increase count 
+    num1, num2 = num2, next_number
+    next_number = num1 + num2

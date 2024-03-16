@@ -1,0 +1,9 @@
+build task1
+  say("Task 1 is running")
+
+build task2
+  say("Task 2 is running")
+
+main
+  create task1 
+  create task2

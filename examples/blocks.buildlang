@@ -1,0 +1,13 @@
+block multiply(num1, num2)
+	send num1 * num2
+
+block convert_binary(num)
+	binary_num = "" 
+    block while num > 0 
+        binary_num = str(num % 2) + binary_num 
+        num = num // 2 
+    send binary_num 
+
+main
+	// more intuitive way to connect functions
+	connect output_of(function1(3, 5)) to input_of(function2()) 

@@ -1,0 +1,32 @@
+{
+  "name": "buildlang",
+  "version": "1.0.0",
+  "description": "A compiler for BuildLang",
+  "type": "module",
+  "main": "buildlang.js",
+  "scripts": {
+    "test": "c8 mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wlogiudi/Blank.git"
+  },
+  "keywords": [
+    "compiler",
+    "ohm"
+  ],
+  "author": "Ty Valencia, Christine Li, and Will LoGiudice",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/wlogiudi/Blank/issues"
+  },
+  "homepage": "https://github.com/wlogiudi/Blank#readme",
+  "devDependencies": {
+    "c8": "^9.1.0",
+    "c9": "^3.1.3534",
+    "mocha": "^10.3.0"
+  },
+  "dependencies": {
+    "ohm-js": "^17.1.0"
+  }
+}

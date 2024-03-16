@@ -1,0 +1,52 @@
+BuildLang {
+	Program		= Stmt+
+    Stmt 		= Assignment
+    			| Say
+                | IfStmt
+                | WhileStmt
+                | IncreaseStmt
+    Assignment 	= NonemptyListOf<id, ","> "=" NonemptyListOf<Exp, ",">	--multipleAssignment
+    			| id "=" Exp							--assignment
+    Say 		= say "(" Args ")"
+    Args		= ListOf<(Exp | stringlit), ",">
+    IfStmt 		= if Exp Block Else?
+    Else		= else IfStmt
+    			| else Block
+    WhileStmt 	= while Exp Block
+    Block 		= Stmt+
+    IncreaseStmt = increase id
+    
+    Exp			= Exp1 relop Exp1					     --comparison
+    			| Exp1
+  	Exp1        = Exp1("+" | "-") Term                   --binary
+              	| Term
+  	Term        = Term ("*" | "/" | "%") Factor          --binary
+  	            | Factor
+  	Factor      = Primary "**" Factor                    --binary
+  	            | "-" Primary                            --negation
+              	| Primary
+  	Primary     = id "(" ListOf<Exp, ","> ")"            --call
+              	| numeral                                --num
+              	| id                                     --id
+              	| "(" Exp ")"                            --parens
+    
+    relop		= "<=" | "<" | ">=" | ">" | "==" | "!="
+    numeral     = digit+ ("." digit+)? (("E" | "e") ("+" | "-")? digit+)?
+  	say       	= "say" ~idchar
+    break       = "break" ~idchar
+    if       	= "if" ~idchar
+    else       	= "else" ~idchar
+    while       = "while" ~idchar
+    increase	= "increase" ~idchar
+    keyword		= say | break | if | else | while | increase
+  	idchar      = letter | digit | "_"
+  	id          = ~keyword letter idchar*
+  	space      	+= "//" (~"\n" any)*                      --comment   
+    stringlit 	=  "\"" char* "\""
+    char 		= "\\'"                    -- single_quote
+         		| "\\\""                   -- double_quote
+         		| "\\n"                    -- newline
+         		| "\\" any                 -- break
+         		| ~"\"" any                -- chars
+
+}
