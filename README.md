@@ -14,7 +14,7 @@ A block-based language that builds off the simplicity of Python but has advanced
 - Type Inference - to make it easier to write
 - Blocks can run at the same time - inspired by Go's goroutines
 - Optionals ? - borrows from JavaScript's approach to handling nulls and errors 
-- |> and <| - implemented to streamline flow of data
+- |> and <| - implemented to streamline flow of data 
 - Async from JavaScript
 - Single Instruction, Multiple Data (SIMD) from Mojo
 - Simple generators from Mojo
@@ -78,7 +78,7 @@ num2 = 1
 nextNumber = num2
 count = 1
 
-while count <= n
+while count <= n:
     say(nextNumber, " ")
     // increase is ++ in Java, can specify by how much with an numeral after the variable
     increase count
@@ -116,17 +116,17 @@ def main:
 <td>
 
 ```
-block multiply(num1, num2)
+block multiply(num1, num2):
 	send num1 * num2
 
-block convert_binary(num)
+block convert_binary(num):
 	binary_num = ""
     block while num > 0
         binary_num = str(num % 2) + binary_num
         num = num // 2
     send binary_num
 
-main
+main:
 	// more intuitive way to connect functions
 	connect output_of(function1(3, 5)) to input_of(function2())
 ```
@@ -160,13 +160,13 @@ with ThreadPoolExecutor() as executor:
 <td>
 
 ```
-build task1
+build task1:
   say("Task 1 is running")
 
-build task2
+build task2:
   say("Task 2 is running")
 
-main
+main:
   create task1
   create task2
 ```
@@ -201,11 +201,11 @@ if __name__ = __main__:
 <td>
 
 ```
-block find_user(username) sends user?
+block find_user(username) sends user?:
   if username == "ty"
     send user(username: "ty", email: "ty@lion.lmu.edu")
 
-main
+main:
     // since find_user is an optional, if no value is sent, None will automatically be sent
     user = find_user("ty")
     ifExists user then
@@ -216,3 +216,8 @@ main
 
 </td>
 </table>
+
+## Notes
+Consider static typing (explicit variable type decl.)
+Implemented |>, <|, and async
+To be implemented: optionals, static typing, Python indenting

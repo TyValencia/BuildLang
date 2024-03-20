@@ -1,34 +1,55 @@
 BuildLang {
 	Program		= Stmt+
-    Stmt 		= Assignment
+
+    Stmt 		= VarDecl
+	            | FunDecl
+				| Assignment
     			| Say
                 | IfStmt
-                | WhileStmt
+				| LoopStmt
                 | IncreaseStmt
-    Assignment 	= NonemptyListOf<id, ","> "=" NonemptyListOf<Exp, ",">	--multipleAssignment
-    			| id "=" Exp							--assignment
+				| break                                            	     	   -- break
+				| Primary ("++" | "--")                            	     	   -- bump
+
+	VarDecl 	= const id "=" Exp ":"
+	            | id "=" Exp 
+	FunDecl 	= (async)? block id "(" ListOf<id, ","> ")" sends id StmtBlock 
+				| (async)? block id "(" ListOf<id, ","> ")" StmtBlock 
+    Assignment 	= NonemptyListOf<id, ","> "=" NonemptyListOf<Exp, ",">	       -- multipleAssignment
+    			| id "=" Exp							               	       -- assignment
     Say 		= say "(" Args ")"
     Args		= ListOf<(Exp | stringlit), ",">
-    IfStmt 		= if Exp Block Else?
+    IfStmt 		= if Exp StmtBlock Else?
     Else		= else IfStmt
-    			| else Block
-    WhileStmt 	= while Exp Block
-    Block 		= Stmt+
-    IncreaseStmt = increase id
+    			| else StmtBlock
+	LoopStmt    = while Exp StmtBlock                         	     	       -- while
+				| stack Exp StmtBlock                        	     	       -- repeat
+				| for id in Exp ("..." | "..<") Exp StmtBlock	     	       -- range
+                | for id in Exp StmtBlock                     	     	       -- collection
+
+    StmtBlock   = indent Stmt+ dedent 
     
-    Exp			= Exp1 relop Exp1					     --comparison
-    			| Exp1
-  	Exp1        = Exp1("+" | "-") Term                   --binary
+	Exp         = Exp1 ("||" Exp1)+                  	          	     	   -- or
+                | Exp1 ("&&" Exp1)+                    	          	     	   -- and
+				| Exp1 
+	Exp1        = Exp2 ("<="|"<"|"=="|"!="|">="|">") Exp2 	     	     	   -- compare
+				| Exp2
+    Exp2        = Exp3 relop Exp3					     	     	     	   -- comparison
+    			| Exp3
+  	Exp3        = Exp3("+" | "-") Term                	        	     	   -- binary
               	| Term
-  	Term        = Term ("*" | "/" | "%") Factor          --binary
+  	Term        = Term ("*" | "/" | "%") Factor       	         	     	   -- binary
   	            | Factor
-  	Factor      = Primary "**" Factor                    --binary
-  	            | "-" Primary                            --negation
-              	| Primary
-  	Primary     = id "(" ListOf<Exp, ","> ")"            --call
-              	| numeral                                --num
-              	| id                                     --id
-              	| "(" Exp ")"                            --parens
+  	Factor      = PipeFwd "**" Factor                 	         	     	   -- binary
+  	            | "-" PipeFwd                         	         	     	   -- negation
+              	| PipeFwd
+	PipeFwd     = PipeFwd "<|" Primary                 	        	     	   -- left_pipe_forward
+				| Primary "|>" PipeFwd                 	        	     	   -- right_pipe_forward
+				| Primary
+  	Primary     = id "(" ListOf<Exp, ","> ")"          	        	     	   -- call
+              	| numeral                              	        	           -- num
+              	| id                                   	        	     	   -- id
+              	| "(" Exp ")"                          	        	     	   -- parens
     
     relop		= "<=" | "<" | ">=" | ">" | "==" | "!="
     numeral     = digit+ ("." digit+)? (("E" | "e") ("+" | "-")? digit+)?
@@ -37,11 +58,21 @@ BuildLang {
     if       	= "if" ~idchar
     else       	= "else" ~idchar
     while       = "while" ~idchar
-    increase	= "increase" ~idchar
-    keyword		= say | break | if | else | while | increase
+	for 	    = "for" ~idchar
+	async       = "async" ~idchar
+	block 		= "block" ~idchar
+	const  	    = "const" ~idchar
+	sends       = "sends" ~idchar
+	stack 	    = "stack" ~idchar
+    keyword		= say | break | if | else | while  
+	            | async | block | const | sends | stack
+
+	indent      =  "⇨"
+	dedent      =  "⇦"
+
   	idchar      = letter | digit | "_"
   	id          = ~keyword letter idchar*
-  	space      	+= "//" (~"\n" any)*                      --comment   
+  	space      	+= "//" (~"\n" any)*       -- comment   
     stringlit 	=  "\"" char* "\""
     char 		= "\\'"                    -- single_quote
          		| "\\\""                   -- double_quote
