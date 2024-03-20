@@ -7,14 +7,12 @@ BuildLang {
     			| Say
                 | IfStmt
 				| LoopStmt
-                | IncreaseStmt
 				| break                                            	     	   -- break
 				| Primary ("++" | "--")                            	     	   -- bump
 
-	VarDecl 	= const id "=" Exp ":"
-	            | id "=" Exp 
-	FunDecl 	= (async)? block id "(" ListOf<id, ","> ")" sends id StmtBlock 
-				| (async)? block id "(" ListOf<id, ","> ")" StmtBlock 
+	VarDecl 	= (const)? type id "=" Exp 
+	type 		= int | float | string | bool | void
+	FunDecl 	= (async)? block id "(" ListOf<id, ","> ")" (sends id)? ":" StmtBlock 
     Assignment 	= NonemptyListOf<id, ","> "=" NonemptyListOf<Exp, ",">	       -- multipleAssignment
     			| id "=" Exp							               	       -- assignment
     Say 		= say "(" Args ")"
@@ -64,8 +62,15 @@ BuildLang {
 	const  	    = "const" ~idchar
 	sends       = "sends" ~idchar
 	stack 	    = "stack" ~idchar
+	in 	     	= "in" ~idchar
+	int 	   = "int" ~idchar
+	float 	   = "float" ~idchar
+	string 	   = "string" ~idchar
+	bool 	   = "bool" ~idchar
+	void 	   = "void" ~idchar
     keyword		= say | break | if | else | while  
-	            | async | block | const | sends | stack
+	            | async | block | const | sends | stack | for | in 
+				| int | float | string | bool | void
 
 	indent      =  "⇨"
 	dedent      =  "⇦"
