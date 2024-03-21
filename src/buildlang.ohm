@@ -47,8 +47,8 @@ BuildLang {
   	Primary     = id "(" ListOf<Exp, ","> ")"          	        	     	   -- call
 				| true ~mut
 				| false ~mut
-				| intlit ~mut
 				| floatlit ~mut
+				| intlit ~mut
 				| stringlit ~mut
               	| numeral                              	        	           -- num
               	| id                                   	        	     	   -- id
