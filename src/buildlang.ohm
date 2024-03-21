@@ -12,7 +12,7 @@ BuildLang {
 
 	VarDecl 	= (const)? type id "=" Exp 
 	type 		= int | float | string | bool | void
-	FunDecl 	= (async)? block id "(" ListOf<id, ","> ")" (sends id)? ":" StmtBlock 
+	FunDecl 	= (async)? block id "(" ListOf<id, ","> ")" (sends id)? ":" StmtBlock? 
     Assignment 	= NonemptyListOf<id, ","> "=" NonemptyListOf<Exp, ",">	       -- multipleAssignment
     			| id "=" Exp							               	       -- assignment
     Say 		= say "(" Args ")"
