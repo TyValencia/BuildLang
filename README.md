@@ -121,14 +121,14 @@ block multiply(num1, num2):
 
 block convert_binary(num):
 	binary_num = ""
-    block while num > 0
+    while num > 0
         binary_num = str(num % 2) + binary_num
         num = num // 2
     send binary_num
 
 main:
 	// more intuitive way to connect functions
-	connect output_of(function1(3, 5)) to input_of(function2())
+	connect output_of(multiply(3, 5)) to input_of(convert_binary()) // FIX
 ```
 
 </td>
