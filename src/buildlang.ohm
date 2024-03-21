@@ -45,6 +45,11 @@ BuildLang {
 				| Primary "|>" Pipe                 	        	     	   -- right_pipe_forward
 				| Primary
   	Primary     = id "(" ListOf<Exp, ","> ")"          	        	     	   -- call
+				| true ~mut
+				| false ~mut
+				| intlit ~mut
+				| floatlit ~mut
+				| stringlit ~mut
               	| numeral                              	        	           -- num
               	| id                                   	        	     	   -- id
               	| "(" Exp ")"                          	        	     	   -- parens
@@ -68,13 +73,18 @@ BuildLang {
 	string 	   = "string" ~idchar
 	bool 	   = "bool" ~idchar
 	void 	   = "void" ~idchar
+	true 	   = "true" ~idchar
+	false 	   = "false" ~idchar
     keyword		= say | break | if | else | while  
 	            | async | block | const | sends | stack | for | in 
-				| int | float | string | bool | void
+				| int | float | string | bool | void | true | false
 
 	indent      =  "⇨"
 	dedent      =  "⇦"
 
+	intlit      = digit+
+	floatlit    = digit+ "." digit+ (("E" | "e") ("+" | "-")? digit+)?
+	mut         = ~"==" "=" | "++" | "--"
   	idchar      = letter | digit | "_"
   	id          = ~keyword letter idchar*
   	space      	+= "//" (~"\n" any)*                      -- comment   
