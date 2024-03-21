@@ -55,4 +55,4 @@ function withIndentsAndDedents(source) {
     return result;
   }
   
-  module.exports = { withIndentsAndDedents };
+  export { withIndentsAndDedents };

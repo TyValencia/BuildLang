@@ -13,7 +13,7 @@ const syntaxChecks = [
   ["comments with no text are ok", "say(1)//\nsay(0)//"],
   ["non-Latin letters in identifiers", "コンパイラ = 100"],
   ["simplest syntactically correct program", "break"],
-  ["multiple statements", "print(1);\nbreak;\nx=5; send send"],
+  ["multiple statements", "say(1) \nbreak \nx=5 send send"],
   ["variable declarations", "let e=99*1;\nconst z=false"], 
   ["function with no params, no return type", "block f(): "],
   ["function with one param", "block f(x: int): "],
@@ -65,6 +65,10 @@ const syntaxChecks = [
   ["u-escape", 'say("\\u{a}\\u{2c}\\u{1e5}\\u{ae89}\\u{1f4a9}\\u{10ffe8}")'],
   ["end of program inside comment", "say(0); // yay"],
   ["comments with no text", "say(1)//\nsay(0)//"],
+  ["async functions", "block async f(): "],
+  ["async functions with return type", "block async f() sends int: "],
+  ["pipe-forward with function call", "5 |> say"],
+  ["pipe-backward with function call", "say <| 10"],
 ]
 
 const syntaxErrors = [
