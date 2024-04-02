@@ -4,26 +4,32 @@ BuildLang {
     Stmt 		= VarDecl
 	            | FunDecl
 				| Assignment
+				| Primary ("++" | "--")                            	     	   -- bump
     			| Say
+				| FunCall 
                 | IfStmt
 				| LoopStmt
 				| break                                            	     	   -- break
-				| Primary ("++" | "--")                            	     	   -- bump
+				| send Exp                                                     -- return
+                | send                                                         -- shortreturn
 
-	VarDecl 	= (const)? type id "=" Exp 
-	type 		= int | float | string | bool | void
-	FunDecl 	= (async)? block id "(" ListOf<id, ","> ")" (sends id)? ":" StmtBlock? 
+	VarDecl 	= type id "=" Exp 
+	type 		= ("$")? (int | float | string | bool | void)                  -- read_only_symbol
+	FunDecl 	= (async)? block id "(" ListOf<Param, ","> ")" (sends TypeArray)? ":" StmtBlock? 
+    Param       = TypeArray id
+    TypeArray   = ("[")* type ("]")* 
     Assignment 	= NonemptyListOf<id, ","> "=" NonemptyListOf<Exp, ",">	       -- multipleAssignment
     			| id "=" Exp							               	       -- assignment
     Say 		= say "(" Args ")"
+	FunCall     = Exp "(" Args ")" 
     Args		= ListOf<(Exp | stringlit), ",">
-    IfStmt 		= if Exp StmtBlock Else?
-    Else		= else IfStmt
-    			| else StmtBlock
-	LoopStmt    = while Exp StmtBlock                         	     	       -- while
-				| stack Exp StmtBlock                        	     	       -- repeat
-				| for id in Exp ("..." | "..<") Exp StmtBlock	     	       -- range
-                | for id in Exp StmtBlock                     	     	       -- collection
+    IfStmt 		= if Exp ":" StmtBlock Else?
+    Else		= else IfStmt                                                  -- else_if
+    			| else ":" StmtBlock                                           -- else
+	LoopStmt    = while Exp ":" StmtBlock                     	     	       -- while
+				| stack Exp ":" StmtBlock                     	     	       -- repeat
+				| for id in Exp ("..." | "..<") Exp ":" StmtBlock	  	       -- range
+                | for id in Exp ":" StmtBlock                  	     	       -- collection
 
     StmtBlock   = indent Stmt+ dedent 
     
@@ -44,15 +50,20 @@ BuildLang {
 	Pipe        = Pipe "<|" Primary                	            	     	   -- left_pipe_forward
 				| Primary "|>" Pipe                 	        	     	   -- right_pipe_forward
 				| Primary
-  	Primary     = id "(" ListOf<Exp, ","> ")"          	        	     	   -- call
-				| true ~mut
+  	Primary     = true ~mut
 				| false ~mut
 				| floatlit ~mut
 				| intlit ~mut
 				| stringlit ~mut
+				| Primary ("(" | "?(") ListOf<Exp, ","> ")" ~mut               -- call
+              	| Primary ("[" | "?[") Exp "]"                                 -- subscript
+             	| Primary ("." | "?.") id                                      -- member
+             	| stringlit ~mut
               	| numeral                              	        	           -- num
               	| id                                   	        	     	   -- id
-              	| "(" Exp ")"                          	        	     	   -- parens
+              	| TypeArray "(" ")" ~mut                                       -- emptyarray
+                | "[" NonemptyListOf<Exp, ","> "]" ~mut                        -- arrayexp
+                | "(" Exp ")" ~mut                                             -- parens
     
     relop		= "<=" | "<" | ">=" | ">" | "==" | "!="
     numeral     = digit+ ("." digit+)? (("E" | "e") ("+" | "-")? digit+)?
@@ -64,19 +75,19 @@ BuildLang {
 	for 	    = "for" ~idchar
 	async       = "async" ~idchar
 	block 		= "block" ~idchar
-	const  	    = "const" ~idchar
+	send 	    = "send" ~idchar
 	sends       = "sends" ~idchar
 	stack 	    = "stack" ~idchar
 	in 	     	= "in" ~idchar
-	int 	   = "int" ~idchar
-	float 	   = "float" ~idchar
-	string 	   = "string" ~idchar
-	bool 	   = "bool" ~idchar
-	void 	   = "void" ~idchar
-	true 	   = "true" ~idchar
-	false 	   = "false" ~idchar
+	int 	    = "int" ~idchar
+	float 	    = "float" ~idchar
+	string 	    = "string" ~idchar
+	bool 	    = "bool" ~idchar
+	void 	    = "void" ~idchar
+	true 	    = "true" ~idchar
+	false 	    = "false" ~idchar
     keyword		= say | break | if | else | while  
-	            | async | block | const | sends | stack | for | in 
+	            | async | block | send | sends | stack | for | in 
 				| int | float | string | bool | void | true | false
 
 	indent      =  "⇨"
