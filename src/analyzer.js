@@ -202,14 +202,14 @@ export default function analyze(match) {
 
 
 
-
+  // Builder taken from Carlos, adapt function bodies to match correct parameters
 
   const builder = match.matcher.grammar.createSemantics().addOperation("rep", {
     Program(statements) {
       return core.program(statements.children.map(s => s.rep()))
     },
 
-    VarDecl(modifier, id, _eq, exp, _semicolon) {
+    VarDecl(modifier, id, _eq, exp) {
       const initializer = exp.rep()
       const readOnly = modifier.sourceString === "const"
       const variable = core.variable(id.sourceString, readOnly, initializer.type)
@@ -218,12 +218,37 @@ export default function analyze(match) {
       return core.variableDeclaration(variable, initializer)
     },
 
-    
+    FunDecl(async, _block, id, _open, paramList, _close, _sends, typeArray, _colon, stmtBlock) {
+      const fun = core.fun(id.sourceString)
+      mustNotAlreadyBeDeclared(id.sourceString, { at: id })
+      context.add(id.sourceString, fun)
 
+      context = context.newChildContext({ inLoop: false, function: fun })
+      const params = parameters.rep()
 
+      const paramTypes = params.map(param => param.type)
+      const returnType = type.children?.[0]?.rep() ?? VOID
+      fun.type = core.functionType(paramTypes, returnType)
 
+      const body = block.rep()
 
-    // Program rep
+      context = context.parent
+      return core.functionDeclaration(fun, params, body)
+    },
+
+    Assignment(lhs, _eq, rhs) {
+      const left = lhs.rep()
+      const right = rhs.rep()
+      mustBeAssignable(right, left, { at: lhs })
+      mustNotBeReadOnly(left, { at: lhs })
+      return core.assignment(left, right)
+    },
+
+    TypeArray(_left, baseType, _right) {
+      return core.arrayType(baseType.rep())
+    },
+
+    // Rest of program rep
     // ...
 
 
