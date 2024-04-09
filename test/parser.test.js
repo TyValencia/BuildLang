@@ -82,7 +82,7 @@ const syntaxErrors = [
   ["negation before exponentiation", "say(-2**2)", /Line 1, col 8:/],
   ["mixing ands and ors", "say(1 && 2 || 3)", /Line 1, col 13:/], 
   ["mixing ors and ands", "say(1 || 2 && 3)", /Line 1, col 13:/],
-  ["associating relational operators", "say(1 < 2 < 3)", /Line 1, col 13:/], // FIX
+  ["associating relational operators", "say(1 < 2 < 3)", /Line 1, col 13:/], 
   ["while without colon", "while true \n say(1)", /Line 1, col 8/], 
   ["if without colon", "if x < 3 \n say(1)", /Line 1, col 7/], 
   ["while as identifier", "int for = 3", /Line 1, col 5/],

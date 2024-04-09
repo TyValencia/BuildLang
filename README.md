@@ -39,7 +39,7 @@ if __name__ = main:
 <td>
 
 ```
-main
+main:
     say("Hello world!")
 ```
 
@@ -61,7 +61,7 @@ num2 = 1
 next_number = num2
 count = 1
 
-while count <= n:
+for _ in range(n):
     print(next_number, end=" ")
     count += 1
     num1, num2 = num2, next_number
@@ -72,16 +72,15 @@ while count <= n:
 <td>
 
 ```
-n=10
-num1 = 0
-num2 = 1
-nextNumber = num2
-count = 1
+int n = 10
+int num1 = 0
+int num2 = 1
+int nextNumber = num2
+int count = 1
 
-while count <= n:
+stack n:
     say(nextNumber, " ")
-    // increase is ++ in Java, can specify by how much with an numeral after the variable
-    increase count
+    count++
     num1, num2 = num2, next_number
     next_number = num1 + num2
 ```
@@ -89,7 +88,7 @@ while count <= n:
 </td>
 </table>
 
-### Calling multiple functions
+### Implementing Pipelines
 
 <table>
 <tr> <th>Python</th><th>BuildLang</th><tr>
@@ -116,25 +115,24 @@ def main:
 <td>
 
 ```
-block multiply(num1, num2):
+block multiply(int num1, int num2):
 	send num1 * num2
 
-block convert_binary(num):
-	binary_num = ""
+block convert_binary(int num):
+	bool binary_num = ""
     while num > 0
         binary_num = str(num % 2) + binary_num
         num = num // 2
     send binary_num
 
 main:
-	// more intuitive way to connect functions
-	connect output_of(multiply(3, 5)) to input_of(convert_binary()) // FIX
+	3, 5 |> multiply |> convert_binary
 ```
 
 </td>
 </table>
 
-### Functions in parallel
+### Async Functions 
 
 <table>
 <tr> <th>Python</th><th>BuildLang</th><tr>
@@ -143,38 +141,44 @@ main:
 <td>
 
 ```
-from concurrent.futures import ThreadPoolExecutor
+import asyncio
 
-def task1():
-    print("Task 1 is running")
+async def print_msg(delay, message):
+    await asyncio.sleep(delay)
+    print(message)
 
-def task2():
-    print("Task 2 is running")
+async def msgs():
+    await asyncio.gather(
+        print_msg(1, "Hello after 1 second"),
+        print_msg(2, "World after 2 seconds")
+    )
 
-with ThreadPoolExecutor() as executor:
-    executor.submit(task1)
-    executor.submit(task2)
+def main:
+    asyncio.run(msgs())
 ```
 
 </td>
 <td>
 
 ```
-build task1:
-  say("Task 1 is running")
+async block say_msg(int delay, string message):
+    await asyncio.sleep(delay)
+    say(message)
 
-build task2:
-  say("Task 2 is running")
+async block msgs():
+    await asyncio.gather(
+        say_msg(1, "Hello after 1 second"),
+        say_msg(2, "World after 2 seconds")
+    )
 
 main:
-  create task1
-  create task2
+    msgs()
 ```
 
 </td>
 </table>
 
-### Optionals
+### Optionals (can be implemented in the future)
 
 <table>
 <tr> <th>Python</th><th>BuildLang</th><tr>
@@ -201,8 +205,8 @@ if __name__ = __main__:
 <td>
 
 ```
-block find_user(username) sends user?:
-  if username == "ty"
+block find_user(string username) sends user?:
+  if username == "ty":
     send user(username: "ty", email: "ty@lion.lmu.edu")
 
 main:
@@ -219,6 +223,5 @@ main:
 
 ## Notes
 
-Consider static typing (explicit variable type decl.)
-Implemented |>, <|, and async
-To be implemented: optionals, static typing, Python indenting
+Implemented Python indenting and dedenting, static typing, pipeline operators, and async
+To be implemented: optionals, SIMD, simple generators, and unique IDE
