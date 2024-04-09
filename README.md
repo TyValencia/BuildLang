@@ -2,7 +2,7 @@
 
 ![Logo](docs/buildlanglogo.png)
 
-### by: Ty Valencia, Christine Li, and Will LoGiudice
+### by: Ty Valencia and Christine Li
 
 ## Description
 
@@ -13,8 +13,8 @@ A block-based language that builds off the simplicity of Python but has advanced
 - Connecting blocks - functions can be easily connected each other in an intuitive way
 - Type Inference - to make it easier to write
 - Blocks can run at the same time - inspired by Go's goroutines
-- Optionals ? - borrows from JavaScript's approach to handling nulls and errors 
-- |> and <| - implemented to streamline flow of data 
+- Optionals ? - borrows from JavaScript's approach to handling nulls and errors
+- |> and <| - implemented to streamline flow of data
 - Async from JavaScript
 - Single Instruction, Multiple Data (SIMD) from Mojo
 - Simple generators from Mojo
@@ -218,6 +218,7 @@ main:
 </table>
 
 ## Notes
+
 Consider static typing (explicit variable type decl.)
 Implemented |>, <|, and async
 To be implemented: optionals, static typing, Python indenting
