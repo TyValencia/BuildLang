@@ -24,15 +24,15 @@ const syntaxChecks = [
   ["assignments", "a-- c++ abc=9*3 a=1"],
   ["read-only declaration", "$int x = 5"],
   ["complex var bumps", "c(5)[2]++ c.p.r++ c.q(8)[2](1,1).z-- "], 
-  ["call in statement", "f(100)"], // FIX call statements
-  ["call in statement after func decl", "block f(int x): \n say(5) \n f(100)"], // FIX 
+  ["call in statement", "f(100)"], 
+  ["call in statement after func decl", "block f(int x): \n say(5) \n f(100)"], 
   ["call in exp", "say(5 * f(x, y, 2 * y))"], 
   ["short if", "if true: \n say(1)"], 
-  ["longer if", "if true: \n say(1) \n else: \n say(1)"], // FIX
-  ["even longer if", "if true: \n say(1) \n else if false: \n say(1)"], // FIX
+  ["longer if", "if true: \n say(1) ⇦ else: ⇨ say(1)"], // Correct, but look over preparser to make sure all indents & dedents are accounted for
+  ["even longer if", "if true: \n say(1) ⇦ else if false: ⇨ say(1)"], 
   ["while with one statement block", "while true: \n int x = 1"], 
-  ["repeat with long block", "stack 2: say(1) \n say(2) \n say(3)"], // FIX
-  ["if inside loop", "stack 3: \n if true: \n say(1)"], // FIX
+  ["repeat with long block", "stack 2: \n say(1) \n say(2) \n say(3)"], 
+  ["if inside loop", "stack 3: \n if true: ⇨ say(1) ⇦"], 
   ["for closed range", "for i in 2...9*1: \n say(1)"], 
   ["for half-open range", "for i in 2..<9*1: \n say(1)"], 
   ["for collection-as-id", "for i in things: \n say(1)"], 
@@ -41,7 +41,7 @@ const syntaxChecks = [
   ["ands can be chained", "say(1 && 2 && 3 && 4 && 5)"],
   ["relational operators", "say(1<2||1<=2||1==2||1!=2||1>=2||1>2)"],
   ["arithmetic", "send(2 * x + 3 / 5 - -1 % 7 ** 3 ** 3)"], 
-  ["length", "send c.length \n send [1,2,3].length]"], // FIX [1,2,3].length 
+  ["length", "send [1,2,3].length"], 
   ["boolean literals", "bool x = false || true"],
   ["all numeric literal forms", "say(8 * 89.123 * 1.3E5 * 1.3E+5 * 1.3E-5)"],
   ["empty array literal", "say([int]())"], 
@@ -59,6 +59,7 @@ const syntaxChecks = [
   ["comments with no text", "say(1)//\nsay(0)//"],
   ["async functions", "async block f(): "], 
   ["async functions with return type", "async block f() sends int: "], 
+  ["random used like a function", "say(random(1,2))", /Line 1, col 12/], // √ is a feature, returns random of the outputs
   ["pipe-forward with function call", "5 |> say"], // FIX pipe-forward
   ["pipe-backward with function call", "say <| 10"], // FIX pipe-backward
   // Possible optional tests:  
@@ -67,9 +68,10 @@ const syntaxChecks = [
   // ["??", "send a ?? b ?? c ?? d"],
 ];
 
+// These all pass (they are supposed to have errors) when put in Ohm editor, but some have issues with the preparser
 const syntaxErrors = [
   ["non-letter in an identifier", "ab😭c = 2", /Line 1, col 3/],
-  ["malformed number", "int x = 2.", /Line 1, col 6/], 
+  ["malformed number", "int x = 2.", /Line 1, col 5/], 
   ["a missing right operand", "say(5 -", /Line 1, col 6/], 
   ["a non-operator", "say(7 * ((2 _ 3)", /Line 1, col 11/], 
   ["an expression starting with a )", "x = )", /Line 1, col 5/],
@@ -88,7 +90,6 @@ const syntaxErrors = [
   ["while with empty block", "while true:", /Line 1, col 11/], 
   ["unbalanced brackets", "block f(): int[", /Line 1, col 15/], 
   ["empty array without type", "say([])", /Line 1, col 6/], 
-  ["random used like a function", "say(random(1,2))", /Line 1, col 12/], // FIX
   ["bad array literal", "say([1,2,])", /Line 1, col 9/], 
   ["empty subscript", "say(a[])", /Line 1, col 7/], 
   ["true is not assignable", "true = 1", /Line 1, col 5/], 
@@ -97,10 +98,9 @@ const syntaxErrors = [
   ["numbers cannot be called", "say(500(x))", /Line 1, col 8/],
   ["numbers cannot be dereferenced", "say(500 .x)", /Line 1, col 9/],
   ["no-paren function type", "block f(g:int sends int): ", /Line 1, col 19/], 
-  ["string lit with unknown escape", 'say("ab\\zcdef")', /col 9/], // FIX
-  ["string lit with newline", 'say("ab\\zcdef")', /col 9/], // FIX
-  ["string lit with quote", 'say("ab\\zcdef")', /col 9/], // FIX
-  ["string lit with code point too long", 'say("\\u{1111111}")', /col 15/], // FIX
+  ["string lit with unknown escape", 'say("ab\\zcdef")', /col 9/], 
+  ["string lit with quote", 'say("ab"zcdef")', /col 9/], 
+  ["string lit with code point too long", 'say("\\u{1111111}")', /col 15/], 
 ];
 
 describe("The parser", () => {

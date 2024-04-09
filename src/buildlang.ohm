@@ -21,13 +21,13 @@ BuildLang {
     Assignment 	= NonemptyListOf<id, ","> "=" NonemptyListOf<Exp, ",">	       -- multipleAssignment
     			| id "=" Exp							               	       -- assignment
     Say 		= say "(" Args ")"
-	FunCall     = Exp "(" Args ")" 
+	FunCall     = id "(" Args ")" 
     Args		= ListOf<(Exp | stringlit), ",">
-    IfStmt 		= if Exp ":" StmtBlock Else?
-    Else		= else IfStmt                                                  -- else_if
-    			| else ":" StmtBlock                                           -- else
+	IfStmt      = if Exp ":" StmtBlock else ":" StmtBlock                      -- long
+				| if Exp ":" StmtBlock else IfStmt                             -- elsif
+				| if Exp ":" StmtBlock                                         -- short
 	LoopStmt    = while Exp ":" StmtBlock                     	     	       -- while
-				| stack Exp ":" StmtBlock                     	     	       -- repeat
+				| stack intlit ":" StmtBlock                         	       -- repeat
 				| for id in Exp ("..." | "..<") Exp ":" StmtBlock	  	       -- range
                 | for id in Exp ":" StmtBlock                  	     	       -- collection
 
@@ -38,13 +38,11 @@ BuildLang {
 				| Exp1 
 	Exp1        = Exp2 ("<="|"<"|"=="|"!="|">="|">") Exp2 	     	     	   -- compare
 				| Exp2
-    Exp2        = Exp3 relop Exp3					     	     	     	   -- comparison
-    			| Exp3
-  	Exp3        = Exp3("+" | "-") Term                	        	     	   -- binary
-              	| Term
-  	Term        = Term ("*" | "/" | "%") Factor       	         	     	   -- binary
-  	            | Factor
-  	Factor      = Pipe "**" Factor                  	         	     	   -- binary
+  	Exp2        = Exp2("+" | "-") Exp3                	        	     	   -- binary
+              	| Exp3
+  	Exp3        = Exp3 ("*" | "/" | "%") Exp4       	         	     	   -- binary
+  	            | Exp4
+  	Exp4        = Pipe "**" Exp4                  	             	     	   -- binary
   	            | "-" Pipe                           	         	     	   -- negation
               	| Pipe
 	Pipe        = Pipe "<|" Primary                	            	     	   -- left_pipe_forward
@@ -54,38 +52,44 @@ BuildLang {
 				| false ~mut
 				| floatlit ~mut
 				| intlit ~mut
-				| stringlit ~mut
 				| Primary ("(" | "?(") ListOf<Exp, ","> ")" ~mut               -- call
               	| Primary ("[" | "?[") Exp "]"                                 -- subscript
              	| Primary ("." | "?.") id                                      -- member
              	| stringlit ~mut
-              	| numeral                              	        	           -- num
               	| id                                   	        	     	   -- id
               	| TypeArray "(" ")" ~mut                                       -- emptyarray
                 | "[" NonemptyListOf<Exp, ","> "]" ~mut                        -- arrayexp
                 | "(" Exp ")" ~mut                                             -- parens
     
-    relop		= "<=" | "<" | ">=" | ">" | "==" | "!="
-    numeral     = digit+ ("." digit+)? (("E" | "e") ("+" | "-")? digit+)?
-  	say       	= "say" ~idchar
-    break       = "break" ~idchar
-    if       	= "if" ~idchar
-    else       	= "else" ~idchar
-    while       = "while" ~idchar
-	for 	    = "for" ~idchar
-	async       = "async" ~idchar
-	block 		= "block" ~idchar
-	send 	    = "send" ~idchar
-	sends       = "sends" ~idchar
-	stack 	    = "stack" ~idchar
-	in 	     	= "in" ~idchar
-	int 	    = "int" ~idchar
-	float 	    = "float" ~idchar
-	string 	    = "string" ~idchar
-	bool 	    = "bool" ~idchar
-	void 	    = "void" ~idchar
-	true 	    = "true" ~idchar
-	false 	    = "false" ~idchar
+	intlit      = digit+
+	floatlit    = digit+ "." digit+ (("E" | "e") ("+" | "-")? digit+)?
+	stringlit 	=  "\"" char* "\""
+	char        = ~control ~"\\" ~"\"" any
+				| "\\" ("n" | "t" | "\"" | "\\")                -- escape
+				| "\\u{" hex hex? hex? hex? hex? hex? "}"       -- codepoint
+	control     = "\x00".."\x1f" | "\x80".."\x9f"
+    hex         = hexDigit
+	mut         = ~"==" "=" | "++" | "--"
+
+  	say       	= "say" ~alnum
+    break       = "break" ~alnum
+    if       	= "if" ~alnum
+    else       	= "else" ~alnum
+    while       = "while" ~alnum
+	for 	    = "for" ~alnum
+	async       = "async" ~alnum
+	block 		= "block" ~alnum
+	send 	    = "send" ~alnum
+	sends       = "sends" ~alnum
+	stack 	    = "stack" ~alnum
+	in 	     	= "in" ~alnum
+	int 	    = "int" ~alnum
+	float 	    = "float" ~alnum
+	string 	    = "string" ~alnum
+	bool 	    = "bool" ~alnum
+	void 	    = "void" ~alnum
+	true 	    = "true" ~alnum
+	false 	    = "false" ~alnum
     keyword		= say | break | if | else | while  
 	            | async | block | send | sends | stack | for | in 
 				| int | float | string | bool | void | true | false
@@ -93,22 +97,7 @@ BuildLang {
 	indent      =  "⇨"
 	dedent      =  "⇦"
 
-	intlit      = digit+
-	floatlit    = digit+ "." digit+ (("E" | "e") ("+" | "-")? digit+)?
-	mut         = ~"==" "=" | "++" | "--"
-  	idchar      = letter | digit | "_"
-  	id          = ~keyword letter idchar*
-  	space      	+= "//" (~"\n" any)*                      -- comment   
-    stringlit 	=  "\"" char* "\""
-	char 		= ~control ~"\\" ~"\"" any
-				| "\\" ("n" | "t" | "\"" | "\\")          -- escape
-				| "\\u{" hex hex? hex? hex? hex? hex? "}" -- codepoint
-				| "\\'"                                   -- single_quote
-				| "\\\""                                  -- double_quote
-				| "\\n"                                   -- newline
-				| "\\" any                                -- break
-				| ~"\"" any                               -- chars
-	control     = "\x00".."\x1f" | "\x80".."\x9f"
-    hex         = hexDigit
+  	id          = ~keyword letter alnum*
+  	space      	+= "//" (~"\n" any)*                            -- comment
 
 }
