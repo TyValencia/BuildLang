@@ -28,7 +28,7 @@ const syntaxChecks = [
   ["call in statement after func decl", "block f(int x): \n say(5) \n f(100)"], 
   ["call in exp", "say(5 * f(x, y, 2 * y))"], 
   ["short if", "if true: \n say(1)"], 
-  ["longer if", "if true: \n say(1) ⇦ else: ⇨ say(1)"], // Correct, but look over preparser to make sure all indents & dedents are accounted for
+  ["longer if", "if true:\n  say(1)\nelse:\n  say(1)"], 
   ["even longer if", "if true: \n say(1) ⇦ else if false: ⇨ say(1)"], 
   ["while with one statement block", "while true: \n int x = 1"], 
   ["repeat with long block", "stack 2: \n say(1) \n say(2) \n say(3)"], 
@@ -60,47 +60,53 @@ const syntaxChecks = [
   ["async functions", "async block f(): "], 
   ["async functions with return type", "async block f() sends int: "], 
   ["random used like a function", "say(random(1,2))", /Line 1, col 12/], // √ is a feature, returns random of the outputs
-  ["pipe-forward with function call", "5 |> say"], // FIX pipe-forward
-  ["pipe-backward with function call", "say <| 10"], // FIX pipe-backward
+  ["blank line", "say(1)\n\n\nsay(2)"], // preparser tests
+  ["blank lines at end of source", "say(1)\n\n\n"], // preparser tests
+  ["basic pipe-forward", "5 |> say"], 
+  ["basic pipe-backward", "say <| 10"],
+  ["pipe-forward with function call", "block square(int x) sends int: \n send x * x \n 4 |> square"],
+  ["pipe-forward with multiple inputs", "block multiply(int x, int y) sends int: \n send x * y \n 3, 5 |> multiply"],
+
   // Possible optional tests:  
   // ["optional types", "block f(c: int?): float: "],
   // ["conditional", "send x?y:z?y:p "],
   // ["??", "send a ?? b ?? c ?? d"],
 ];
 
-// These all pass (they are supposed to have errors) when put in Ohm editor, but some have issues with the preparser
 const syntaxErrors = [
   ["non-letter in an identifier", "ab😭c = 2", /Line 1, col 3/],
-  ["malformed number", "int x = 2.", /Line 1, col 5/], 
-  ["a missing right operand", "say(5 -", /Line 1, col 6/], 
-  ["a non-operator", "say(7 * ((2 _ 3)", /Line 1, col 11/], 
+  ["malformed number", "int x = 2.", /Line 1, col 11/], 
+  ["a missing right operand", "say(5 -", /Line 2, col 1/], 
+  ["a non-operator", "say(7 * ((2 _ 3)", /Line 1, col 13/], 
   ["an expression starting with a )", "x = )", /Line 1, col 5/],
   ["a statement starting with expression", "x * 5", /Line 1, col 3/], 
-  ["an illegal statement on line 2", "say(5) \n x * 5", /Line 2, col 3/], 
+  ["an illegal statement on line 2", "say(5) \n x * 5", /Line 2, col 1/], 
   ["a statement starting with a )", "say(5) \n ) * 5", /Line 2, col 1/],
   ["an expression starting with a *", "x = * 71", /Line 1, col 5/],
   ["negation before exponentiation", "say(-2**2)", /Line 1, col 8:/],
-  ["mixing ands and ors", "say(1 && 2 || 3)", /Line 1, col 13:/], 
-  ["mixing ors and ands", "say(1 || 2 && 3)", /Line 1, col 13:/],
-  ["associating relational operators", "say(1 < 2 < 3)", /Line 1, col 13:/], 
-  ["while without colon", "while true \n say(1)", /Line 1, col 8/], 
-  ["if without colon", "if x < 3 \n say(1)", /Line 1, col 7/], 
+  ["mixing ands and ors", "say(1 && 2 || 3)", /Line 1, col 12:/], 
+  ["mixing ors and ands", "say(1 || 2 && 3)", /Line 1, col 12:/],
+  ["associating relational operators", "say(1 < 2 < 3)", /Line 1, col 11:/], 
+  ["while without colon", "while true \n say(1)", /Line 2, col 1/], 
+  ["if without colon", "if x < 3 \n say(1)", /Line 2, col 1/], 
   ["while as identifier", "int for = 3", /Line 1, col 5/],
   ["if as identifier", "int if = 8", /Line 1, col 5/], 
-  ["while with empty block", "while true:", /Line 1, col 11/], 
+  ["while with empty block", "while true:", /Line 2, col 1/], 
   ["unbalanced brackets", "block f(): int[", /Line 1, col 15/], 
   ["empty array without type", "say([])", /Line 1, col 6/], 
-  ["bad array literal", "say([1,2,])", /Line 1, col 9/], 
+  ["bad array literal", "say([1,2,])", /Line 1, col 10/], 
   ["empty subscript", "say(a[])", /Line 1, col 7/], 
   ["true is not assignable", "true = 1", /Line 1, col 5/], 
   ["false is not assignable", "false = 1", /Line 1, col 6/], 
   ["numbers cannot be subscripted", "say(500[x])", /Line 1, col 8/],
   ["numbers cannot be called", "say(500(x))", /Line 1, col 8/],
   ["numbers cannot be dereferenced", "say(500 .x)", /Line 1, col 9/],
-  ["no-paren function type", "block f(g:int sends int): ", /Line 1, col 19/], 
+  ["no-paren function type", "block f(int g sends int): ", /Line 1, col 15/], 
   ["string lit with unknown escape", 'say("ab\\zcdef")', /col 9/], 
   ["string lit with quote", 'say("ab"zcdef")', /col 9/], 
   ["string lit with code point too long", 'say("\\u{1111111}")', /col 15/], 
+  ["bad indentation", "if true:\n  say(1)\n say(2)", /Indent Error/],
+  ["tabs", "if true:\n\tsay(1)", /Illegal whitespace character/],
 ];
 
 describe("The parser", () => {
