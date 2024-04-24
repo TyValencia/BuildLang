@@ -27,53 +27,19 @@ const semanticChecks = [
     ["ok to != arrays", "print([1] != [5,8])"],
     ["arithmetic", "int x=1 \n say(2 * 3 + 5 ** -3 / 2 - 5 % 8)"],
     ["array length", "say([1, 2, 3].length)"],
-  
-    /*
-    // Other tests to modify from Carlos: 
-
-    ["variables", "let x=[[[[1]]]]; print(x[0][0][0][0]+2);"],
-    ["pseudo recursive struct", "struct S {z: S?} let x = S(no S);"],
-    ["nested structs", "struct T{y:int} struct S{z: T} let x=S(T(1)); print(x.z.y);"],
-    ["member exp", "struct S {x: int} let y = S(1);print(y.x);"],
-    ["optional member exp", "struct S {x: int} let y = some S(1);print(y?.x);"],
-    ["subscript exp", "let a=[1,2];print(a[0]);"],
-    ["array of struct", "struct S{} let x=[S(), S()];"],
-    ["struct of arrays and opts", "struct S{x: [int] y: string??}"],
-    ["assigned functions", "function f() {}\nlet g = f;g = f;"],
-    ["call of assigned functions", "function f(x: int) {}\nlet g=f;g(1);"],
-    ["type equivalence of nested arrays", "function f(x: [[int]]) {} print(f([[1],[2]]));"],
-    [
-      "call of assigned function in expression",
-      `function f(x: int, y: boolean): int {}
-      let g = f;
-      print(g(1, true));
-      f = g; // Type check here`,
-    ],
-    [
-      "pass a function to a function",
-      `function f(x: int, y: (boolean)->void): int { return 1; }
-       function g(z: boolean) {}
-       f(2, g);`,
-    ],
-    [
-      "function return types",
-      `function square(x: int): int { return x * x; }
-       function compose(): (int)->int { return square; }`,
-    ],
-    ["function assign", "function f() {} let g = f; let h = [g, f]; print(h[0]());"],
-    ["struct parameters", "struct S {} function f(x: S) {}"],
-    ["array parameters", "function f(x: [int?]) {}"],
-    ["optional parameters", "function f(x: [int], y: string?) {}"],
-    ["empty optional types", "print(no [int]); print(no string);"],
-    ["types in function type", "function f(g: (int?, float)->string) {}"],
-    ["voids in fn type", "function f(g: (void)->void) {}"],
-    ["outer variable", "let x=1; while(false) {print(x);}"],
-    ["built-in constants", "print(25.0 * π);"],
-    ["built-in sin", "print(sin(π));"],
-    ["built-in cos", "print(cos(93.999));"],
-    ["built-in hypot", "print(hypot(-4.0, 3.00001));"],
+    ["variables", "int x=[[[[1]]]] \n say(x[0][0][0][0] + 2)"],
+    ["subscript exp", "int a = [1, 2] \n say(a[0])"],
+    ["type equivalence of nested arrays", "block f([[int]] x): \n say(f([[1],[2]]))"],
+    ["pass a function to a function", "block f(int x, boolean y) sends int: \n send 1 \n block g(boolean z) \n f(2, g)"],
+    ["array parameters", "block f([int] x):"],
+    ["outer variable", "int x = 1 \n while(false): \n say(x)"],
+    ["built-in constants", "say(25.0 * π)"],
+    ["built-in sin", "say(sin(π))"],
+    ["built-in cos", "say(cos(93.999))"],
+    ["built-in hypot", "say(hypot(-4.0, 3.00001))"],
 
     // Optional tests: 
+    /*
     ["assign optionals", "let a = no int;let b=some 1;a=b;b=a;"],
     ["conditionals with ints", "print(true ? 8 : 5);"],
     ["conditionals with floats", "print(1<2 ? 8.0 : -5.22);"],
@@ -84,6 +50,13 @@ const semanticChecks = [
     ["random with array literals, ints", "print(random [1,2,3]);"],
     ["random with array literals, strings", 'print(random ["a", "b"]);'],
     ["random on array variables", "let a=[true, false];print(random a);"],
+    ["optional parameters", "function f(x: [int], y: string?) {}"],
+    ["empty optional types", "print(no [int]); print(no string);"],
+    ["types in function type", "function f(g: (int?, float)->string) {}"],
+
+    // Other tests to modify from Carlos:
+    // ["assigned functions", "block f(): \n block g = f \n g = f"],
+    // ["call of assigned functions", "block f(int x): \n block g = f \n g(1);"],
     */
 ]
 
@@ -109,68 +82,39 @@ const semanticErrors = [
     ["non-integer low range", "for i in true...2:", /Expected an integer/],
     ["non-integer high range", "for i in 1..<3.14:", /Expected an integer/],
     ["non-array in for", "for i in 100:", /Expected an array/],
-
-    // Other tests to modify from Carlos:
-
-    /*
-    ["bad types for ||", "print(false||1);", /Expected a boolean/],
-    ["bad types for &&", "print(false&&1);", /Expected a boolean/],
-    ["bad types for ==", "print(false==1);", /Operands do not have the same type/],
-    ["bad types for !=", "print(false==1);", /Operands do not have the same type/],
-    ["bad types for +", "print(false+1);", /Expected a number or string/],
-    ["bad types for -", "print(false-1);", /Expected a number/],
-    ["bad types for *", "print(false*1);", /Expected a number/],
-    ["bad types for /", "print(false/1);", /Expected a number/],
-    ["bad types for **", "print(false**1);", /Expected a number/],
-    ["bad types for <", "print(false<1);", /Expected a number or string/],
-    ["bad types for <=", "print(false<=1);", /Expected a number or string/],
-    ["bad types for >", "print(false>1);", /Expected a number or string/],
-    ["bad types for >=", "print(false>=1);", /Expected a number or string/],
-    ["bad types for ==", "print(2==2.0);", /not have the same type/],
-    ["bad types for !=", "print(false!=1);", /not have the same type/],
-    ["bad types for negation", "print(-true);", /Expected a number/],
-    ["bad types for length", "print(#false);", /Expected an array/],
-    ["bad types for not", 'print(!"hello");', /Expected a boolean/],
-    ["bad types for random", "print(random 3);", /Expected an array/],
-    ["non-integer index", "let a=[1];print(a[false]);", /Expected an integer/],
-    ["no such field", "struct S{} let x=S(); print(x.y);", /No such field/],
-    ["diff type array elements", "print([3,3.0]);", /Not all elements have the same type/],
-    ["shadowing", "let x = 1;\nwhile true {let x = 1;}", /Identifier x already declared/],
-    ["call of uncallable", "let x = 1;\nprint(x());", /Call of non-function/],
-    [
-      "Too many args",
-      "function f(x: int) {}\nf(1,2);",
-      /1 argument\(s\) required but 2 passed/,
-    ],
-    [
-      "Too few args",
-      "function f(x: int) {}\nf();",
-      /1 argument\(s\) required but 0 passed/,
-    ],
-    [
-      "Parameter type mismatch",
-      "function f(x: int) {}\nf(false);",
-      /Cannot assign a boolean to a int/,
-    ],
-    [
-      "function type mismatch",
-      `function f(x: int, y: (boolean)->void): int { return 1; }
-       function g(z: boolean): int { return 5; }
-       f(2, g);`,
-      /Cannot assign a \(boolean\)->int to a \(boolean\)->void/,
-    ],
-    ["bad param type in fn assign", "function f(x: int) {} function g(y: float) {} f = g;"],
-    [
-      "bad return type in fn assign",
-      'function f(x: int): int {return 1;} function g(y: int): string {return "uh-oh";} f = g;',
-      /Cannot assign a \(int\)->string to a \(int\)->int/,
-    ],
-    ["bad call to sin()", "print(sin(true));", /Cannot assign a boolean to a float/],
-    ["Non-type in param", "let x=1;function f(y:x){}", /Type expected/],
-    ["Non-type in return type", "let x=1;function f():x{return 1;}", /Type expected/],
-    ["Non-type in field type", "let x=1;struct S {y:x}", /Type expected/],
+    ["bad types for ||", "say(false || 1)", /Expected a boolean/],
+    ["bad types for &&", "say(false && 1)", /Expected a boolean/],
+    ["bad types for ==", "say(false == 1)", /Operands do not have the same type/],
+    ["bad types for !=", "say(false != 1)", /Operands do not have the same type/],
+    ["bad types for +", "say(false + 1)", /Expected a number or string/],
+    ["bad types for -", "say(false - 1)", /Expected a number/],
+    ["bad types for *", "say(false * 1)", /Expected a number/],
+    ["bad types for /", "say(false / 1)", /Expected a number/],
+    ["bad types for **", "say(false ** 1)", /Expected a number/],
+    ["bad types for <", "say(false < 1)", /Expected a number or string/],
+    ["bad types for <=", "say(false <= 1)", /Expected a number or string/],
+    ["bad types for >", "say(false > 1)", /Expected a number or string/],
+    ["bad types for >=", "say(false >= 1)", /Expected a number or string/],
+    ["bad types for ==", "say(2 == 2.0)", /not have the same type/],
+    ["bad types for !=", "say(false != 1)", /not have the same type/],
+    ["bad types for negation", "say(-true)", /Expected a number/],
+    ["bad types for not", 'say(!"hello")', /Expected a boolean/],
+    ["bad types for random", "say(random 3)", /Expected an array/],
+    ["non-integer index", "int a = [1] \n say(a[false])", /Expected an integer/],
+    ["diff type array elements", "say([3, 3.0])", /Not all elements have the same type/],
+    ["shadowing", "int x = 1 \n while true: \n int x = 1", /Identifier x already declared/],
+    ["call of uncallable", "int x = 1 \n say(x())", /Call of non-function/],
+    ["Too many args", "block f(int x): \n f(1, 2)", /1 argument required but 2 passed/],
+    ["Too few args", "block f(int x): \n f()", /1 argument required but 0 passed/],
+    ["Parameter type mismatch", "block f(int x): \n f(false)", /Cannot assign a boolean to a int/],
+    ["bad param type in fn assign", "block f(int x): \n send \n block g(float y): \n send \n f = g"],
+    ["bad call to sin()", "say(sin(true))", /Cannot assign a boolean to a float/],
+    ["Non-type in param", "int x=1 \n block f(y x):", /Type expected/],
+    ["Non-type in return type", "int x = 1 \n block f() sends int: \n return true", /Type expected/],
 
     // Optional tests: 
+
+    /*
     ["assign bad optional type", "let x=1;x=some 2;", /Cannot assign a int\? to a int/],
     ["non-boolean conditional test", "print(1?2:3);", /Expected a boolean/],
     ["diff types in conditional arms", "print(true?1:true);", /not have the same type/],

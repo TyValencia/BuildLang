@@ -5,8 +5,7 @@ BuildLang {
 	            | FunDecl
 				| Assignment
 				| Primary ("++" | "--")                            	     	   -- bump
-    			| Say
-				| FunCall 
+    			| FunCall
                 | IfStmt
 				| LoopStmt
 				| break                                            	     	   -- break
@@ -15,13 +14,16 @@ BuildLang {
 
 	VarDecl 	= type id "=" Exp 
 	type 		= ("$")? (int | float | string | bool | void)                  -- read_only_symbol
-	FunDecl 	= (async)? block id "(" ListOf<Param, ","> ")" (sends TypeArray)? ":" StmtBlock? 
+	FunDecl 	= (async)? block id "(" ListOf<Param, ","> ")" (sends TypeArray)? ":" StmtBlock?
     Param       = TypeArray id
     TypeArray   = ("[")* type ("]")* 
     Assignment 	= NonemptyListOf<id, ","> "=" NonemptyListOf<Exp, ",">	       -- multipleAssignment
     			| id "=" Exp							               	       -- assignment
-    Say 		= say "(" Args ")"
-	FunCall     = id "(" Args ")" 
+    FunCall  	= say "(" Args ")"                                             -- say
+                | (say | id) "<|" PrimaryList                                  -- left_pipe_foward
+                | PrimaryList "|>" (say | id)                                  -- right_pipe_forward
+				| id "(" Args ")"                                              -- function_call
+	PrimaryList = NonemptyListOf<Primary, ",">
     Args		= ListOf<(Exp | stringlit), ",">
 	IfStmt      = if Exp ":" StmtBlock else ":" StmtBlock                      -- long
 				| if Exp ":" StmtBlock else IfStmt                             -- elsif
@@ -42,12 +44,9 @@ BuildLang {
               	| Exp3
   	Exp3        = Exp3 ("*" | "/" | "%") Exp4       	         	     	   -- binary
   	            | Exp4
-  	Exp4        = Pipe "**" Exp4                  	             	     	   -- binary
-  	            | "-" Pipe                           	         	     	   -- negation
-              	| Pipe
-	Pipe        = Pipe "<|" Primary                	            	     	   -- left_pipe_forward
-				| Primary "|>" Pipe                 	        	     	   -- right_pipe_forward
-				| Primary
+  	Exp4        = Primary "**" Exp4                  	             	  	   -- binary
+  	            | "-" Primary                           	         	  	   -- negation
+              	| Primary
   	Primary     = true ~mut
 				| false ~mut
 				| floatlit ~mut
@@ -65,8 +64,8 @@ BuildLang {
 	floatlit    = digit+ "." digit+ (("E" | "e") ("+" | "-")? digit+)?
 	stringlit 	=  "\"" char* "\""
 	char        = ~control ~"\\" ~"\"" any
-				| "\\" ("n" | "t" | "\"" | "\\")                -- escape
-				| "\\u{" hex hex? hex? hex? hex? hex? "}"       -- codepoint
+				| "\\" ("n" | "t" | "\"" | "\\")                               -- escape
+				| "\\u{" hex hex? hex? hex? hex? hex? "}"                      -- codepoint
 	control     = "\x00".."\x1f" | "\x80".."\x9f"
     hex         = hexDigit
 	mut         = ~"==" "=" | "++" | "--"
