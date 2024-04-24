@@ -2,10 +2,10 @@ block find_user(username) sends user?
   if username == "ty"
     send user(username: "ty", email: "ty@lion.lmu.edu")
 
-main
+main:
     // since find_user is an optional, if no value is sent, None will automatically be sent 
     user = find_user("ty")
-    ifExists user then
+    ifExists user then:
         say(user.email)
-	else
+	else:
 	    say("User not found")

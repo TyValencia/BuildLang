@@ -4,6 +4,6 @@ build task1
 build task2
   say("Task 2 is running")
 
-main
+main:
   create task1 
   create task2
