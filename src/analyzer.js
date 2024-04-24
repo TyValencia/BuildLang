@@ -201,21 +201,22 @@ export default function analyze(match) {
       return core.program(statements.children.map(s => s.rep()))
     },
 
-    VarDecl(baseType, id, _eq, exp) {
-      const type = baseType.rep() // Implement baseType
+    VarDecl(baseType, id, _eq, exp) { 
       const initializer = exp.rep()
-      const variable = core.variable(id.sourceString, readOnly, initializer.type)
+      const readOnly = modifier.sourceString === "$"
+      const baseTypeRep = baseType.rep()
+      const variable = core.variable(id.sourceString, readOnly, baseTypeRep)
       mustNotAlreadyBeDeclared(id.sourceString, { at: id })
       context.add(id.sourceString, variable)
       return core.variableDeclaration(variable, initializer)
     },
 
-    Type(modifier, baseType) {
-      const readOnly = modifier.sourceString === "const"
+    Type(modifier, baseType) { // X 
+      const readOnly = modifier.sourceString === "$"
       return core.typeDeclaration(baseType.rep(), readOnly)
     },
 
-    FunDecl(async, _block, id, _open, paramList, _close, _sends, typeArray, _colon, stmtBlock) {
+    FunDecl(async, _block, id, _open, paramList, _close, _sends, typeArray, _colon, stmtBlock) { // X
       const fun = core.fun(id.sourceString)
       mustNotAlreadyBeDeclared(id.sourceString, { at: id })
       context.add(id.sourceString, fun)
@@ -233,18 +234,18 @@ export default function analyze(match) {
       return core.functionDeclaration(fun, params, body)
     },
 
-    Param(typeArray, id) {
+    Param(typeArray, id) { // X 
       const type = typeArray.rep()
       const param = core.variable(id.sourceString, false, type)
       context.add(id.sourceString, param)
       return param
     },
 
-    TypeArray(_lhb, type, _rhb) {
-      return type.rep()
+    TypeArray(_left, baseType, _right) { 
+      return core.arrayType(baseType.rep())
     },
 
-    Statement_assignment(idList, _eq, expList) {
+    Statement_assignment(idList, _eq, expList) { // X 
       const ids = idList.children.map(id => id.sourceString)
       const exps = expList.children.map(exp => exp.rep())
       const variables = ids.map(id => context.lookup(id))
@@ -252,7 +253,7 @@ export default function analyze(match) {
       return core.sequence(assignments)
     },
 
-    Statement_bump(exp, operator) {
+    Statement_bump(exp, operator) { 
       const variable = exp.rep()
       mustHaveIntegerType(variable, { at: exp })
       return operator.sourceString === "++"
@@ -260,12 +261,12 @@ export default function analyze(match) {
         : core.decrement(variable)
     },
 
-    Statement_break(breakKeyword) {
+    Statement_break(breakKeyword) { // X 
       mustBeInLoop({ at: breakKeyword })
       return core.breakStatement
     },
 
-    Statement_send(returnKeyword, exp) {
+    Statement_send(returnKeyword, exp) { 
       mustBeInAFunction({ at: returnKeyword })
       mustReturnSomething(context.function, { at: returnKeyword })
       const returnExpression = exp.rep()
@@ -273,13 +274,13 @@ export default function analyze(match) {
       return core.returnStatement(returnExpression)
     },
 
-    Statement_shortsend(returnKeyword) {
+    Statement_shortsend(returnKeyword) { 
       mustBeInAFunction({ at: returnKeyword })
       mustNotReturnAnything(context.function, { at: returnKeyword })
       return core.shortReturnStatement()
     },
 
-    Say(say, _open, args, _close) {
+    Say(say, _open, args, _close) { // X 
       const exp = args.rep()
       const f = context.function
       mustBeInAFunction({ at: say })
@@ -288,7 +289,7 @@ export default function analyze(match) {
       return core.say(exp)
     },
 
-    FunCall(id, _open, args, _close) {
+    FunCall(id, _open, args, _close) { // X
       const fun = context.lookup(id.sourceString)
       const exps = args.rep()
       mustBeCallable(fun, { at: id })
@@ -297,11 +298,11 @@ export default function analyze(match) {
       return core.funCall(fun, exps)
     },
 
-    Args(argsList) {
+    Args(argsList) { // X
       return argsList.rep()
     },
 
-    IfStmt_long(_if, exp, _colon1, block1, _else, _colon2, block2) {
+    IfStmt_long(_if, exp, _colon1, block1, _else, _colon2, block2) { 
       const test = exp.rep()
       mustHaveBooleanType(test, { at: exp })
       context = context.newChildContext()
@@ -313,7 +314,7 @@ export default function analyze(match) {
       return core.ifStatement(test, consequent, alternate)
     },
 
-    IfStmt_elsif(_if, exp, _colon, block, _else, trailingIfStatement) {
+    IfStmt_elsif(_if, exp, _colon, block, _else, trailingIfStatement) { 
       const test = exp.rep()
       mustHaveBooleanType(test, { at: exp })
       context = context.newChildContext()
@@ -322,7 +323,7 @@ export default function analyze(match) {
       return core.ifStatement(test, consequent, alternate)
     },
 
-    IfStmt_short(_if, exp, _colon, block) {
+    IfStmt_short(_if, exp, _colon, block) { 
       const test = exp.rep()
       mustHaveBooleanType(test, { at: exp })
       context = context.newChildContext()
@@ -331,7 +332,7 @@ export default function analyze(match) {
       return core.shortIfStatement(test, consequent)
     },
 
-    LoopStmt_while(_while, exp, _colon, block) {
+    LoopStmt_while(_while, exp, _colon, block) { 
       const test = exp.rep()
       mustHaveBooleanType(test, { at: exp })
       context = context.newChildContext({ inLoop: true })
@@ -340,7 +341,7 @@ export default function analyze(match) {
       return core.whileStatement(test, body)
     },
 
-    LoopStmt_repeat(_stack, intlit, _colon, block) {
+    LoopStmt_repeat(_stack, intlit, _colon, block) { 
       const count = intlit.rep()
       mustHaveIntegerType(count, { at: intlit })
       context = context.newChildContext({ inLoop: true })
@@ -349,7 +350,7 @@ export default function analyze(match) {
       return core.repeatStatement(count, body)
     },
 
-    LoopStmt_range(_for, id, _in, exp1, op, exp2, _colon, block) {
+    LoopStmt_range(_for, id, _in, exp1, op, exp2, _colon, block) { 
       const [low, high] = [exp1.rep(), exp2.rep()]
       mustHaveIntegerType(low, { at: exp1 })
       mustHaveIntegerType(high, { at: exp2 })
@@ -361,7 +362,7 @@ export default function analyze(match) {
       return core.forRangeStatement(iterator, low, op.sourceString, high, body)
     },
 
-    LoopStmt_collection(_for, id, _in, exp, _colon, block) {
+    LoopStmt_collection(_for, id, _in, exp, _colon, block) { 
       const collection = exp.rep()
       mustHaveAnArrayType(collection, { at: exp })
       const iterator = core.variable(id.sourceString, true, collection.type.baseType)
@@ -372,14 +373,14 @@ export default function analyze(match) {
       return core.forStatement(iterator, collection, body)
     },
 
-    StmtBlock(_indent, Stmt, _dedent) {
-      return Stmt.rep()
+    StmtBlock(_indent, Stmt, _dedent) { 
+      return Stmt.children.map(s => s.rep())
     },
 
     
     // Expressions mostly have correct bodies
 
-    Exp_or(exp, _ops, exps) {
+    Exp_or(exp, _ops, exps) { 
       let left = exp.rep()
       mustHaveBooleanType(left, { at: exp })
       for (let e of exps.children) {
@@ -390,7 +391,7 @@ export default function analyze(match) {
       return left
     },
 
-    Exp_and(exp, _ops, exps) {
+    Exp_and(exp, _ops, exps) { 
       let left = exp.rep()
       mustHaveBooleanType(left, { at: exp })
       for (let e of exps.children) {
@@ -401,7 +402,7 @@ export default function analyze(match) {
       return left
     },
 
-    Exp1_compare(exp1, relop, exp2) {
+    Exp1_compare(exp1, relop, exp2) { 
       const [left, op, right] = [exp1.rep(), relop.sourceString, exp2.rep()]
       if (["<", "<=", ">", ">="].includes(op)) {
         mustHaveNumericOrStringType(left, { at: exp1 })
@@ -410,7 +411,7 @@ export default function analyze(match) {
       return core.binary(op, left, right, BOOLEAN)
     },
 
-    Exp2_add(exp1, addOp, exp2) {
+    Exp2_add(exp1, addOp, exp2) { 
       const [left, op, right] = [exp1.rep(), addOp.sourceString, exp2.rep()]
       if (op === "+") {
         mustHaveNumericOrStringType(left, { at: exp1 })
@@ -421,32 +422,32 @@ export default function analyze(match) {
       return core.binary(op, left, right, left.type)
     },
 
-    Exp3_multiply(exp1, mulOp, exp2) {
+    Exp3_multiply(exp1, mulOp, exp2) { 
       const [left, op, right] = [exp1.rep(), mulOp.sourceString, exp2.rep()]
       mustHaveNumericType(left, { at: exp1 })
       mustBothHaveTheSameType(left, right, { at: mulOp })
       return core.binary(op, left, right, left.type)
     },
 
-    Exp4_power(exp1, powerOp, exp2) {
+    Exp4_power(exp1, powerOp, exp2) { 
         const [left, op, right] = [exp1.rep(), powerOp.sourceString, exp2.rep()]
         mustHaveNumericType(left, { at: exp1 })
         mustBothHaveTheSameType(left, right, { at: powerOp })
         return core.binary(op, left, right, left.type)
       },
 
-    Exp4_negation(_neg, exp) { 
+    Exp4_negation(_neg, exp) { // X
       const operand = exp.rep()
       mustHaveNumericType(operand, { at: exp })
       return core.unary("-", operand, operand.type)
     },
 
-    Left_pipe(exp1, _pipe, exp2) { 
+    Left_pipe(exp1, _pipe, exp2) { // X
       const [left, right] = [exp1.rep(), exp2.rep()]
       return core.pipeForward(left, right)
     },
 
-    Right_pipe(exp1, _pipe, exp2) {
+    Right_pipe(exp1, _pipe, exp2) { // X
       const [left, right] = [exp1.rep(), exp2.rep()]
       return core.pipeBackward(left, right)
     },

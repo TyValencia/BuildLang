@@ -10,12 +10,13 @@ A block-based language that builds off the simplicity of Python but has advanced
 
 ## Features
 
-- Connecting blocks - functions can be easily connected each other in an intuitive way
-- Type Inference - to make it easier to write
-- Blocks can run at the same time - inspired by Go's goroutines
-- Optionals ? - borrows from JavaScript's approach to handling nulls and errors
-- |> and <| - implemented to streamline flow of data
-- Async from JavaScript
+- Blocks (functions) can be easily connected each other in an intuitive way through the pipe operator |> and <|
+- Type Inference makes it make it easier to interpret code
+- Optionals ? are borrowed from JavaScript's approach to handling nulls and errors
+- Async also borrowed from JavaScript
+
+## Stretch goals
+
 - Single Instruction, Multiple Data (SIMD) from Mojo
 - Simple generators from Mojo
 - Unique IDE - create a clean UI that makes it fun for kids to code (stretch goal)
@@ -76,11 +77,9 @@ int n = 10
 int num1 = 0
 int num2 = 1
 int nextNumber = num2
-int count = 1
 
 stack n:
     say(nextNumber, " ")
-    count++
     num1, num2 = num2, next_number
     next_number = num1 + num2
 ```
@@ -115,10 +114,10 @@ def main:
 <td>
 
 ```
-block multiply(int num1, int num2):
+block multiply(int num1, int num2) sends int:
 	send num1 * num2
 
-block convert_binary(int num):
+block convert_binary(int num) sends int:
 	bool binary_num = ""
     while num > 0
         binary_num = str(num % 2) + binary_num
