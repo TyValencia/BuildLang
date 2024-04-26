@@ -9,25 +9,25 @@ BuildLang {
                 | IfStmt
                 | LoopStmt
                 | break                                            	     	   -- break
-                | send Exp                                                     -- return
-                | send                                                         -- shortreturn
+                | send Exp                                                   -- return
+                | send                                                       -- shortreturn
 
     VarDecl     = type id "=" Exp 
-    type        = ("$")? (int | float | string | bool | void)                  -- read_only_symbol
+    type        = ("$")? (int | float | string | bool | void)                -- read_only_symbol
     FunDecl     = (async)? block id "(" ListOf<Param, ","> ")" (sends TypeArray)? ":" StmtBlock?
     Param       = TypeArray id
     TypeArray   = ("[")* type ("]")* 
-    Assignment  = NonemptyListOf<id, ","> "=" NonemptyListOf<Exp, ",">	       -- multipleAssignment
-                | id "=" Exp							               	       -- assignment
-    FunCall     = say "(" Args ")"                                             -- say
-                | (say | id) "<|" PrimaryList                                  -- left_pipe_foward
-                | PrimaryList "|>" (say | id)                                  -- right_pipe_forward
-                | id "(" Args ")"                                              -- function_call
+    Assignment  = NonemptyListOf<id, ","> "=" NonemptyListOf<Exp, ",">       -- multipleAssignment
+                | id "=" Exp                                                 -- assignment
+    FunCall     = say "(" Args ")"                                           -- say
+                | (say | id) "<|" PrimaryList                                -- left_pipe_foward
+                | PrimaryList "|>" (say | id)                                -- right_pipe_forward
+                | id "(" Args ")"                                            -- function_call
     PrimaryList = NonemptyListOf<Primary, ",">
     Args        = ListOf<(Exp | stringlit), ",">
-    IfStmt      = if Exp ":" StmtBlock else ":" StmtBlock                      -- long
-                | if Exp ":" StmtBlock else IfStmt                             -- elsif
-                | if Exp ":" StmtBlock                                         -- short
+    IfStmt      = if Exp ":" StmtBlock else ":" StmtBlock                    -- long
+                | if Exp ":" StmtBlock else IfStmt                           -- elsif
+                | if Exp ":" StmtBlock                                       -- short
     LoopStmt    = while Exp ":" StmtBlock                     	     	       -- while
                 | stack intlit ":" StmtBlock                         	       -- repeat
                 | for id in Exp ("..." | "..<") Exp ":" StmtBlock	  	       -- range
@@ -35,59 +35,59 @@ BuildLang {
 
     StmtBlock   = indent Stmt+ dedent 
     
-    Exp         = Exp1 ("||" Exp1)+                  	          	     	   -- or
-                | Exp1 ("&&" Exp1)+                    	          	     	   -- and
+    Exp         = Exp1 ("||" Exp1)+                                          -- or
+                | Exp1 ("&&" Exp1)+                                          -- and
                 | Exp1 
-    Exp1        = Exp2 ("<="|"<"|"=="|"!="|">="|">") Exp2 	     	     	   -- compare
-       			| Exp2
-    Exp2        = Exp2("+" | "-") Exp3                	        	     	   -- binary
+    Exp1        = Exp2 ("<="|"<"|"=="|"!="|">="|">") Exp2                    -- compare
+                | Exp2
+    Exp2        = Exp2("+" | "-") Exp3                                       -- binary
                	| Exp3
-    Exp3        = Exp3 ("*" | "/" | "%") Exp4       	         	     	   -- binary
+    Exp3        = Exp3 ("*" | "/" | "%") Exp4                                -- binary
                 | Exp4
-    Exp4        = Primary "**" Exp4                  	             	  	   -- binary
-     	        | "-" Primary                           	         	  	   -- negation
+    Exp4        = Primary "**" Exp4                                          -- binary
+                | "-" Primary                                                -- negation
                 | Primary
     Primary     = true ~mut
                 | false ~mut
                 | floatlit ~mut
                 | intlit ~mut
-                | Primary ("(" | "?(") ListOf<Exp, ","> ")" ~mut               -- call
-              	| Primary ("[" | "?[") Exp "]"                                 -- subscript
-             	| Primary ("." | "?.") id                                      -- member
-             	| stringlit ~mut
-              	| id                                   	        	     	   -- id
-              	| TypeArray "(" ")" ~mut                                       -- emptyarray
-                | "[" NonemptyListOf<Exp, ","> "]" ~mut                        -- arrayexp
-                | "(" Exp ")" ~mut                                             -- parens
+                | Primary ("(" | "?(") ListOf<Exp, ","> ")" ~mut             -- call
+              	| Primary ("[" | "?[") Exp "]"                               -- subscript
+                | Primary ("." | "?.") id                                    -- member
+                | stringlit ~mut
+              	| id                                                         -- id
+              	| TypeArray "(" ")" ~mut                                     -- emptyarray
+                | "[" NonemptyListOf<Exp, ","> "]" ~mut                      -- arrayexp
+                | "(" Exp ")" ~mut                                           -- parens
     
     intlit      = digit+
     floatlit    = digit+ "." digit+ (("E" | "e") ("+" | "-")? digit+)?
     stringlit   =  "\"" char* "\""
     char        = ~control ~"\\" ~"\"" any
-                | "\\" ("n" | "t" | "\"" | "\\")                               -- escape
-                | "\\u{" hex hex? hex? hex? hex? hex? "}"                      -- codepoint
+                | "\\" ("n" | "t" | "\"" | "\\")                             -- escape
+                | "\\u{" hex hex? hex? hex? hex? hex? "}"                    -- codepoint
     control     = "\x00".."\x1f" | "\x80".."\x9f"
     hex         = hexDigit
     mut         = ~"==" "=" | "++" | "--"
 
     say         = "say" ~alnum
     break       = "break" ~alnum
-    if       	= "if" ~alnum
+    if          = "if" ~alnum
     else       	= "else" ~alnum
     while       = "while" ~alnum
-    for 	    = "for" ~alnum
+    for         = "for" ~alnum
     async       = "async" ~alnum
-    block 		= "block" ~alnum
-    send 	    = "send" ~alnum
+    block       = "block" ~alnum
+    send        = "send" ~alnum
     sends       = "sends" ~alnum
     stack 	    = "stack" ~alnum
-    in 	     	= "in" ~alnum
-    int 	    = "int" ~alnum
+    in          = "in" ~alnum
+    int         = "int" ~alnum
     float 	    = "float" ~alnum
     string 	    = "string" ~alnum
-    bool 	    = "bool" ~alnum
-    void 	    = "void" ~alnum
-    true 	    = "true" ~alnum
+    bool        = "bool" ~alnum
+    void        = "void" ~alnum
+    true        = "true" ~alnum
     false 	    = "false" ~alnum
     keyword	    = say | break | if | else | while  
                 | async | block | send | sends | stack | for | in 
@@ -97,6 +97,6 @@ BuildLang {
     dedent      =  "⇦"
     
     id          = ~keyword letter alnum*
-    space      	+= "//" (~"\n" any)*                            -- comment
+    space      	+= "//" (~"\n" any)*                                         -- comment
 
 }
