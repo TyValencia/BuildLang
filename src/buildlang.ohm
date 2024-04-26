@@ -2,19 +2,19 @@ BuildLang {
     Program     = Stmt+
 
     Stmt        = VarDecl
-	            | FunDecl
-	            | Assignment
-	            | Primary ("++" | "--")                            	     	   -- bump
+                | FunDecl
+                | Assignment
+                | Primary ("++" | "--")                            	     	   -- bump
                 | FunCall
                 | IfStmt
-	            | LoopStmt
-	            | break                                            	     	   -- break
-	            | send Exp                                                     -- return
+                | LoopStmt
+                | break                                            	     	   -- break
+                | send Exp                                                     -- return
                 | send                                                         -- shortreturn
 
-	VarDecl     = type id "=" Exp 
-	type        = ("$")? (int | float | string | bool | void)                  -- read_only_symbol
-	FunDecl     = (async)? block id "(" ListOf<Param, ","> ")" (sends TypeArray)? ":" StmtBlock?
+    VarDecl     = type id "=" Exp 
+    type        = ("$")? (int | float | string | bool | void)                  -- read_only_symbol
+    FunDecl     = (async)? block id "(" ListOf<Param, ","> ")" (sends TypeArray)? ":" StmtBlock?
     Param       = TypeArray id
     TypeArray   = ("[")* type ("]")* 
     Assignment  = NonemptyListOf<id, ","> "=" NonemptyListOf<Exp, ",">	       -- multipleAssignment
@@ -23,35 +23,35 @@ BuildLang {
                 | (say | id) "<|" PrimaryList                                  -- left_pipe_foward
                 | PrimaryList "|>" (say | id)                                  -- right_pipe_forward
                 | id "(" Args ")"                                              -- function_call
-	PrimaryList = NonemptyListOf<Primary, ",">
+    PrimaryList = NonemptyListOf<Primary, ",">
     Args        = ListOf<(Exp | stringlit), ",">
-	IfStmt      = if Exp ":" StmtBlock else ":" StmtBlock                      -- long
+    IfStmt      = if Exp ":" StmtBlock else ":" StmtBlock                      -- long
                 | if Exp ":" StmtBlock else IfStmt                             -- elsif
                 | if Exp ":" StmtBlock                                         -- short
-	LoopStmt    = while Exp ":" StmtBlock                     	     	       -- while
-				| stack intlit ":" StmtBlock                         	       -- repeat
-				| for id in Exp ("..." | "..<") Exp ":" StmtBlock	  	       -- range
+    LoopStmt    = while Exp ":" StmtBlock                     	     	       -- while
+                | stack intlit ":" StmtBlock                         	       -- repeat
+                | for id in Exp ("..." | "..<") Exp ":" StmtBlock	  	       -- range
                 | for id in Exp ":" StmtBlock                  	     	       -- collection
 
     StmtBlock   = indent Stmt+ dedent 
     
-	Exp         = Exp1 ("||" Exp1)+                  	          	     	   -- or
+    Exp         = Exp1 ("||" Exp1)+                  	          	     	   -- or
                 | Exp1 ("&&" Exp1)+                    	          	     	   -- and
-				| Exp1 
-	Exp1        = Exp2 ("<="|"<"|"=="|"!="|">="|">") Exp2 	     	     	   -- compare
-				| Exp2
-  	Exp2        = Exp2("+" | "-") Exp3                	        	     	   -- binary
-              	| Exp3
-  	Exp3        = Exp3 ("*" | "/" | "%") Exp4       	         	     	   -- binary
-  	            | Exp4
-  	Exp4        = Primary "**" Exp4                  	             	  	   -- binary
-  	            | "-" Primary                           	         	  	   -- negation
-              	| Primary
-  	Primary     = true ~mut
-				| false ~mut
-				| floatlit ~mut
-				| intlit ~mut
-				| Primary ("(" | "?(") ListOf<Exp, ","> ")" ~mut               -- call
+                | Exp1 
+    Exp1        = Exp2 ("<="|"<"|"=="|"!="|">="|">") Exp2 	     	     	   -- compare
+       			| Exp2
+    Exp2        = Exp2("+" | "-") Exp3                	        	     	   -- binary
+               	| Exp3
+    Exp3        = Exp3 ("*" | "/" | "%") Exp4       	         	     	   -- binary
+                | Exp4
+    Exp4        = Primary "**" Exp4                  	             	  	   -- binary
+     	        | "-" Primary                           	         	  	   -- negation
+                | Primary
+    Primary     = true ~mut
+	            | false ~mut
+	            | floatlit ~mut
+	            | intlit ~mut
+	            | Primary ("(" | "?(") ListOf<Exp, ","> ")" ~mut               -- call
               	| Primary ("[" | "?[") Exp "]"                                 -- subscript
              	| Primary ("." | "?.") id                                      -- member
              	| stringlit ~mut
