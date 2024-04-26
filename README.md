@@ -8,6 +8,8 @@
 
 A block-based language that builds off the simplicity of Python but has advanced functionality and is even easier to read! This language is good for beginners and advanced programmers alike. BuildLang is supposed to mimic assembling Lego bricks together so that it can bridge the gap for those looking to get into code. It also serves as a good basis as one gets more advanced. As a conglomerate of interesting coding techniques, it can serve as a powerful tool for those who know how to use them.
 
+Github Page: https://github.com/TyValencia/BuildLang/deployments/github-pages
+
 ## Features
 
 - Blocks (functions) can be easily connected each other in an intuitive way through the pipe operator |> and <|
@@ -131,7 +133,7 @@ main:
 </td>
 </table>
 
-### Async Functions 
+### Async Functions
 
 <table>
 <tr> <th>Python</th><th>BuildLang</th><tr>
