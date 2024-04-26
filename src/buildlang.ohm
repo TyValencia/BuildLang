@@ -48,10 +48,10 @@ BuildLang {
      	        | "-" Primary                           	         	  	   -- negation
                 | Primary
     Primary     = true ~mut
-	            | false ~mut
-	            | floatlit ~mut
-	            | intlit ~mut
-	            | Primary ("(" | "?(") ListOf<Exp, ","> ")" ~mut               -- call
+                | false ~mut
+                | floatlit ~mut
+                | intlit ~mut
+                | Primary ("(" | "?(") ListOf<Exp, ","> ")" ~mut               -- call
               	| Primary ("[" | "?[") Exp "]"                                 -- subscript
              	| Primary ("." | "?.") id                                      -- member
              	| stringlit ~mut
@@ -60,43 +60,43 @@ BuildLang {
                 | "[" NonemptyListOf<Exp, ","> "]" ~mut                        -- arrayexp
                 | "(" Exp ")" ~mut                                             -- parens
     
-	intlit      = digit+
-	floatlit    = digit+ "." digit+ (("E" | "e") ("+" | "-")? digit+)?
-	stringlit 	=  "\"" char* "\""
-	char        = ~control ~"\\" ~"\"" any
-				| "\\" ("n" | "t" | "\"" | "\\")                               -- escape
-				| "\\u{" hex hex? hex? hex? hex? hex? "}"                      -- codepoint
-	control     = "\x00".."\x1f" | "\x80".."\x9f"
+    intlit      = digit+
+    floatlit    = digit+ "." digit+ (("E" | "e") ("+" | "-")? digit+)?
+    stringlit   =  "\"" char* "\""
+    char        = ~control ~"\\" ~"\"" any
+                | "\\" ("n" | "t" | "\"" | "\\")                               -- escape
+                | "\\u{" hex hex? hex? hex? hex? hex? "}"                      -- codepoint
+    control     = "\x00".."\x1f" | "\x80".."\x9f"
     hex         = hexDigit
-	mut         = ~"==" "=" | "++" | "--"
+    mut         = ~"==" "=" | "++" | "--"
 
-  	say       	= "say" ~alnum
+    say         = "say" ~alnum
     break       = "break" ~alnum
     if       	= "if" ~alnum
     else       	= "else" ~alnum
     while       = "while" ~alnum
-	for 	    = "for" ~alnum
-	async       = "async" ~alnum
-	block 		= "block" ~alnum
-	send 	    = "send" ~alnum
-	sends       = "sends" ~alnum
-	stack 	    = "stack" ~alnum
-	in 	     	= "in" ~alnum
-	int 	    = "int" ~alnum
-	float 	    = "float" ~alnum
-	string 	    = "string" ~alnum
-	bool 	    = "bool" ~alnum
-	void 	    = "void" ~alnum
-	true 	    = "true" ~alnum
-	false 	    = "false" ~alnum
-    keyword		= say | break | if | else | while  
-	            | async | block | send | sends | stack | for | in 
-				| int | float | string | bool | void | true | false
+    for 	    = "for" ~alnum
+    async       = "async" ~alnum
+    block 		= "block" ~alnum
+    send 	    = "send" ~alnum
+    sends       = "sends" ~alnum
+    stack 	    = "stack" ~alnum
+    in 	     	= "in" ~alnum
+    int 	    = "int" ~alnum
+    float 	    = "float" ~alnum
+    string 	    = "string" ~alnum
+    bool 	    = "bool" ~alnum
+    void 	    = "void" ~alnum
+    true 	    = "true" ~alnum
+    false 	    = "false" ~alnum
+    keyword	    = say | break | if | else | while  
+                | async | block | send | sends | stack | for | in 
+                | int | float | string | bool | void | true | false
 
-	indent      =  "⇨"
-	dedent      =  "⇦"
-
-  	id          = ~keyword letter alnum*
-  	space      	+= "//" (~"\n" any)*                            -- comment
+    indent      =  "⇨"
+    dedent      =  "⇦"
+    
+    id          = ~keyword letter alnum*
+    space      	+= "//" (~"\n" any)*                            -- comment
 
 }
