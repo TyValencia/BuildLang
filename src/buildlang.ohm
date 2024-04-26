@@ -1,33 +1,33 @@
 BuildLang {
-	Program		= Stmt+
+    Program     = Stmt+
 
-    Stmt 		= VarDecl
+    Stmt        = VarDecl
 	            | FunDecl
-				| Assignment
-				| Primary ("++" | "--")                            	     	   -- bump
-    			| FunCall
+	            | Assignment
+	            | Primary ("++" | "--")                            	     	   -- bump
+                | FunCall
                 | IfStmt
-				| LoopStmt
-				| break                                            	     	   -- break
-				| send Exp                                                     -- return
+	            | LoopStmt
+	            | break                                            	     	   -- break
+	            | send Exp                                                     -- return
                 | send                                                         -- shortreturn
 
-	VarDecl 	= type id "=" Exp 
-	type 		= ("$")? (int | float | string | bool | void)                  -- read_only_symbol
-	FunDecl 	= (async)? block id "(" ListOf<Param, ","> ")" (sends TypeArray)? ":" StmtBlock?
+	VarDecl     = type id "=" Exp 
+	type        = ("$")? (int | float | string | bool | void)                  -- read_only_symbol
+	FunDecl     = (async)? block id "(" ListOf<Param, ","> ")" (sends TypeArray)? ":" StmtBlock?
     Param       = TypeArray id
     TypeArray   = ("[")* type ("]")* 
-    Assignment 	= NonemptyListOf<id, ","> "=" NonemptyListOf<Exp, ",">	       -- multipleAssignment
-    			| id "=" Exp							               	       -- assignment
-    FunCall  	= say "(" Args ")"                                             -- say
+    Assignment  = NonemptyListOf<id, ","> "=" NonemptyListOf<Exp, ",">	       -- multipleAssignment
+                | id "=" Exp							               	       -- assignment
+    FunCall     = say "(" Args ")"                                             -- say
                 | (say | id) "<|" PrimaryList                                  -- left_pipe_foward
                 | PrimaryList "|>" (say | id)                                  -- right_pipe_forward
-				| id "(" Args ")"                                              -- function_call
+                | id "(" Args ")"                                              -- function_call
 	PrimaryList = NonemptyListOf<Primary, ",">
-    Args		= ListOf<(Exp | stringlit), ",">
+    Args        = ListOf<(Exp | stringlit), ",">
 	IfStmt      = if Exp ":" StmtBlock else ":" StmtBlock                      -- long
-				| if Exp ":" StmtBlock else IfStmt                             -- elsif
-				| if Exp ":" StmtBlock                                         -- short
+                | if Exp ":" StmtBlock else IfStmt                             -- elsif
+                | if Exp ":" StmtBlock                                         -- short
 	LoopStmt    = while Exp ":" StmtBlock                     	     	       -- while
 				| stack intlit ":" StmtBlock                         	       -- repeat
 				| for id in Exp ("..." | "..<") Exp ":" StmtBlock	  	       -- range
