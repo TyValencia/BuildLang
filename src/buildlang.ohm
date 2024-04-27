@@ -14,9 +14,9 @@ BuildLang {
 
     VarDecl     = type id "=" Exp 
     type        = ("$")? (int | float | string | bool | void)                -- read_only_symbol
-    FunDecl     = (async)? block id Params (sends TypeArray)? ":" StmtBlock?
+    FunDecl     = (async)? block id Params (sends TypeArray)? (":" StmtBlock)?
     Params      = "(" ListOf<Param, ","> ")"
-    Param       = type id
+    Param       = (type | TypeArray) id
     TypeArray   = ("[")* type ("]")* 
     Assignment  = NonemptyListOf<id, ","> "=" NonemptyListOf<Exp, ",">       -- multipleAssignment
                 | id "=" Exp                                                 -- assignment
@@ -27,7 +27,7 @@ BuildLang {
     PrimaryList = NonemptyListOf<Primary, ",">
     Args        = ListOf<(Exp | stringlit), ",">
     IfStmt      = if Exp ":" StmtBlock else ":" StmtBlock                    -- long
-                | if Exp ":" StmtBlock else IfStmt                           -- elsif
+                | if Exp ":" StmtBlock else IfStmt                           -- elseif
                 | if Exp ":" StmtBlock                                       -- short
     LoopStmt    = while Exp ":" StmtBlock                                    -- while
                 | stack (id|intlit) ":" StmtBlock                         	 -- repeat

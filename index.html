@@ -1,7 +1,245 @@
 <!DOCTYPE html>
 <html>
-<body>
-<h1>BuildLang GitHub Pages in progress</h1>
-<p>by Ty Valencia and Christine Li</p>
-</body>
+  <head>
+    <link rel="stylesheet" href="style.css" />
+    <title>Buildlang</title>
+    <link rel="icon" type="image/x-icon" href="/docs/buildlanglogo.png" />
+  </head>
+
+  <body>
+    <a href="https://github.com/TyValencia/BuildLang">
+      <img
+        src="/docs/buildlanglogo.png"
+        alt="Buildlang Logo"
+        width="400"
+        height="400"
+      />
+    </a>
+    <h1>Buildlang</h1>
+    <p>
+      A block-based language that builds off the simplicity of Python but has
+      advanced functionality and is even easier to read! This language is good
+      for beginners and advanced programmers alike. BuildLang is supposed to
+      mimic assembling Lego bricks together so that it can bridge the gap for
+      those looking to get into code. It also serves as a good basis as one gets
+      more advanced. As a conglomerate of interesting coding techniques, it can
+      serve as a powerful tool for those who know how to use them.
+    </p>
+
+    <p>Features:</p>
+    <ul>
+      <li>
+        Blocks (functions) can be easily connected each other in an intuitive
+        way through the pipe operator
+      </li>
+      <li>Type Inference makes it make it easier to interpret code</li>
+      <li>
+        Optionals ? are borrowed from JavaScript's approach to handling nulls
+        and errors
+      </li>
+      <li>Async also borrowed from JavaScript</li>
+    </ul>
+    <p>
+      Link to Github
+      <a href="https://github.com/TyValencia/BuildLang">here</a>.
+    </p>
+    <p>Code Examples</p>
+    <div id="code examples">
+      <h3>Fibonacci Sequence</h3>
+
+      <table>
+        <tr>
+          <th>Python</th>
+          <th>BuildLang</th>
+        </tr>
+        <tr>
+          <td>
+            <pre><code>n = 10
+num1 = 0
+num2 = 1
+next_number = num2
+count = 1
+
+for _ in range(n):
+    print(next_number, end=" ")
+    count += 1
+    num1, num2 = num2, next_number
+    next_number = num1 + num2</code></pre>
+          </td>
+          <td>
+            <pre><code>int n=10
+int num1 = 0
+int num2 = 1
+int nextNumber = num2
+
+stack n:
+    say(nextNumber, " ")
+    num1, num2 = num2, nextNumber
+    nextNumber = num1 + num2</code></pre>
+          </td>
+        </tr>
+      </table>
+
+      <h3>Hello World</h3>
+
+      <table>
+        <tr>
+          <th>Python</th>
+          <th>BuildLang</th>
+        </tr>
+        <tr>
+          <td>
+            <pre><code>if __name__ = main:
+    print("Hello world!")</code></pre>
+          </td>
+          <td>
+            <pre><code>say("Hello world!")</code></pre>
+          </td>
+        </tr>
+      </table>
+
+      <h3>Pipelines</h3>
+
+      <table>
+        <tr>
+          <th>Python</th>
+          <th>BuildLang</th>
+        </tr>
+        <tr>
+          <td>
+            <pre><code>def multiply(num1, num2):
+	return num1 * num2
+
+def convert_binary(num):
+	binary_num = ""
+    while num > 0:
+        binary_num = str(num % 2) + binary_num
+        num = num // 2
+    return binary_num
+
+def main:
+	function2(function1(3, 5))</code></pre>
+          </td>
+          <td>
+            <pre><code>block multiply(int num1, int num2) sends int:
+    send num1 * num2
+
+block convertBinary(int num) sends string:
+    binaryNum = ""
+    while num > 0:
+        binaryNum = str(num % 2) + binaryNum
+        num = math.floor(num / 2)
+    send binaryNum
+
+3, 5 |> multiply |> converyBinary</code></pre>
+          </td>
+        </tr>
+      </table>
+
+      <h3>Async</h3>
+
+      <table>
+        <tr>
+          <th>Python</th>
+          <th>BuildLang</th>
+        </tr>
+        <tr>
+          <td>
+            <pre><code>import asyncio
+
+async def print_msg(delay, message):
+    await asyncio.sleep(delay)
+    print(message)
+
+async def msgs():
+    await asyncio.gather(
+        print_msg(1, "Hello after 1 second"),
+        print_msg(2, "World after 2 seconds")
+    )
+
+def main:
+    asyncio.run(msgs())</code></pre>
+          </td>
+          <td>
+            <pre><code>async block sayMsg(int delay, string message):
+    await asyncio.sleep(delay)
+    say(message)
+
+async block msgs():
+    await asyncio.gather(
+        sayMsg(1, "Hello after 1 second"),
+        sayMsg(2, "World after 2 seconds")
+    )
+
+msgs()</code></pre>
+          </td>
+
+    <h3>Optionals</h3>
+    <table>
+      <tr>
+          <th>Python</th>
+          <th>BuildLang</th>
+      </tr>
+      <tr>
+        <td>
+          <pre><code>
+            
+def find_user(username):
+    if username == "ty":
+        return {"username": "ty", "email": "ty@lion.lmu.edu"}
+    else:
+        return None
+
+if __name__ = __main__:
+    user = find_user("ty")
+    if user is not None:
+        print(user["email"])
+    else:
+        print("User not found")
+          
+          </code></pre>
+        </td>
+        <td>
+          <pre><code>
+block find_user(string username) sends user?:
+  if username == "ty":
+    send user(username: "ty", email: "ty@lion.lmu.edu")
+
+// since find_user is an optional, if no value is sent, None will automatically be sent
+user = find_user("ty")
+ifExists user then:
+    say(user.email)
+else:
+	say("User not found")
+        </code></pre>
+        </td>
+      </tr>
+    </table>
+
+  
+
+    <h2>Developer Bios</h2>
+    <div id="row">
+      <div class="bio">
+        <h4>Ty Valencia</h4>
+        <a href="https://github.com/BradyAmundson"
+          ><img class="bioImg" src="assets/brady.jpeg"
+        /></a>
+        <p>
+          Ty Valencia is a senior Computer Science major at Loyola Marymount
+          University.
+        </p>
+      </div>
+      <div class="bio">
+        <h4>Christine Li</h4>
+        <a href="https://github.com/makenakalei"
+          ><img class="bioImg" src="assets/makena.jpeg"
+        /></a>
+        <p>
+          Christine Li is a junior Computer Science and Psychology double major
+          at Loyola Marymount University.
+        </p>
+      </div>
+    </div>
+  </body>
 </html>
