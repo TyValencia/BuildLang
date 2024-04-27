@@ -42,8 +42,7 @@ if __name__ = main:
 <td>
 
 ```
-main:
-    say("Hello world!")
+say("Hello world!")
 ```
 
 </td>
@@ -75,15 +74,15 @@ for _ in range(n):
 <td>
 
 ```
-int n = 10
+int n=10
 int num1 = 0
 int num2 = 1
 int nextNumber = num2
 
 stack n:
     say(nextNumber, " ")
-    num1, num2 = num2, next_number
-    next_number = num1 + num2
+    num1, num2 = num2, nextNumber
+    nextNumber = num1 + num2
 ```
 
 </td>
@@ -117,17 +116,16 @@ def main:
 
 ```
 block multiply(int num1, int num2) sends int:
-	send num1 * num2
+    send num1 * num2
 
-block convert_binary(int num) sends int:
-	bool binary_num = ""
-    while num > 0
-        binary_num = str(num % 2) + binary_num
-        num = num // 2
-    send binary_num
+block convertBinary(int num) sends string:
+    binaryNum = ""
+    while num > 0:
+        binaryNum = str(num % 2) + binaryNum
+        num = math.floor(num / 2)
+    send binaryNum
 
-main:
-	3, 5 |> multiply |> convert_binary
+3, 5 |> multiply |> converyBinary
 ```
 
 </td>
@@ -162,18 +160,17 @@ def main:
 <td>
 
 ```
-async block say_msg(int delay, string message):
+async block sayMsg(int delay, string message):
     await asyncio.sleep(delay)
     say(message)
 
 async block msgs():
     await asyncio.gather(
-        say_msg(1, "Hello after 1 second"),
-        say_msg(2, "World after 2 seconds")
+        sayMsg(1, "Hello after 1 second"),
+        sayMsg(2, "World after 2 seconds")
     )
 
-main:
-    msgs()
+msgs()
 ```
 
 </td>
@@ -210,13 +207,12 @@ block find_user(string username) sends user?:
   if username == "ty":
     send user(username: "ty", email: "ty@lion.lmu.edu")
 
-main:
-    // since find_user is an optional, if no value is sent, None will automatically be sent
-    user = find_user("ty")
-    ifExists user then
-        say(user.email)
-	else
-	    say("User not found")
+// since find_user is an optional, if no value is sent, None will automatically be sent
+user = find_user("ty")
+ifExists user then:
+    say(user.email)
+else:
+	say("User not found")
 ```
 
 </td>
