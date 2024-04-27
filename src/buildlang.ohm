@@ -3,37 +3,38 @@ BuildLang {
 
     Stmt        = VarDecl
                 | FunDecl
-                | Assignment
-                | Primary ("++" | "--")                            	     	   -- bump
                 | FunCall
+                | Assignment
+                | Primary ("++" | "--")                                      -- bump
                 | IfStmt
                 | LoopStmt
-                | break                                            	     	   -- break
+                | break                                                      -- break
                 | send Exp                                                   -- return
                 | send                                                       -- shortreturn
 
     VarDecl     = type id "=" Exp 
     type        = ("$")? (int | float | string | bool | void)                -- read_only_symbol
-    FunDecl     = (async)? block id "(" ListOf<Param, ","> ")" (sends TypeArray)? ":" StmtBlock?
-    Param       = TypeArray id
+    FunDecl     = (async)? block id Params (sends TypeArray)? ":" StmtBlock?
+    Params      = "(" ListOf<Param, ","> ")"
+    Param       = type id
     TypeArray   = ("[")* type ("]")* 
     Assignment  = NonemptyListOf<id, ","> "=" NonemptyListOf<Exp, ",">       -- multipleAssignment
                 | id "=" Exp                                                 -- assignment
     FunCall     = say "(" Args ")"                                           -- say
-                | (say | id) "<|" PrimaryList                                -- left_pipe_foward
-                | PrimaryList "|>" (say | id)                                -- right_pipe_forward
+                | ((say | id) "<|")+ PrimaryList                             -- left_pipe_foward
+                | PrimaryList ("|>" (say | id))+                             -- right_pipe_forward
                 | id "(" Args ")"                                            -- function_call
     PrimaryList = NonemptyListOf<Primary, ",">
     Args        = ListOf<(Exp | stringlit), ",">
     IfStmt      = if Exp ":" StmtBlock else ":" StmtBlock                    -- long
                 | if Exp ":" StmtBlock else IfStmt                           -- elsif
                 | if Exp ":" StmtBlock                                       -- short
-    LoopStmt    = while Exp ":" StmtBlock                     	     	       -- while
-                | stack intlit ":" StmtBlock                         	       -- repeat
-                | for id in Exp ("..." | "..<") Exp ":" StmtBlock	  	       -- range
-                | for id in Exp ":" StmtBlock                  	     	       -- collection
+    LoopStmt    = while Exp ":" StmtBlock                                    -- while
+                | stack (id|intlit) ":" StmtBlock                         	 -- repeat
+                | for id in Exp ("..." | "..<") Exp ":" StmtBlock            -- range
+                | for id in Exp ":" StmtBlock                                -- collection
 
-    StmtBlock   = indent Stmt+ dedent 
+    StmtBlock   = Stmt+
     
     Exp         = Exp1 ("||" Exp1)+                                          -- or
                 | Exp1 ("&&" Exp1)+                                          -- and

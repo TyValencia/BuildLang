@@ -4,7 +4,7 @@ import compile from "./compiler.js";
 
 const help = `BuildLang compiler
 
-Syntax: buildlang <filename> <outputType>
+Syntax: node src/buildlang.js <filename.js> <outputType>
 
 Prints to stdout according to <outputType>, which must be one of:
 

@@ -1,13 +1,12 @@
-block multiply(num1, num2) sends int:
+block multiply(int num1, int num2) sends int:
 	send num1 * num2
 
-block convert_binary(num) sends int:
-	binary_num = "" 
+block convertBinary(int num) sends string:
+	binaryNum = "" 
     while num > 0:
-        binary_num = str(num % 2) + binary_num 
+        binaryNum = str(num % 2) + binaryNum 
         num = math.floor(num / 2)
-    send binary_num 
+    send binaryNum 
 
-main
-	// more intuitive way to connect functions
-	3, 5 |> multiply |> convery_binary
+// more intuitive way to connect functions
+3, 5 |> multiply |> converyBinary
