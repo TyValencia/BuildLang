@@ -21,7 +21,7 @@ BuildLang {
     Assignment  = NonemptyListOf<id, ","> "=" NonemptyListOf<Exp, ",">       -- multipleAssignment
                 | id "=" Exp                                                 -- assignment
     FunCall     = say "(" Args ")"                                           -- say
-                | ((say | id) "<|")+ PrimaryList                             -- left_pipe_foward
+                | ((say | id) "<|")+ PrimaryList                             -- left_pipe_forward
                 | PrimaryList ("|>" (say | id))+                             -- right_pipe_forward
                 | id "(" Args ")"                                            -- function_call
     PrimaryList = NonemptyListOf<Primary, ",">

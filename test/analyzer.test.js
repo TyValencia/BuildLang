@@ -49,27 +49,6 @@ const semanticChecks = [
   ["built-in sin", "say(sin(π))"],
   ["built-in cos", "say(cos(93.999))"],
   ["built-in hypot", "say(hypot(-4.0, 3.00001))"],
-
-  // Optional tests:
-  /*
-    ["assign optionals", "let a = no int;let b=some 1;a=b;b=a;"],
-    ["conditionals with ints", "print(true ? 8 : 5);"],
-    ["conditionals with floats", "print(1<2 ? 8.0 : -5.22);"],
-    ["conditionals with strings", 'print(1<2 ? "x" : "y");'],
-    ["??", "print(some 5 ?? 0);"],
-    ["nested ??", "print(some 5 ?? 8 ?? 0);"],
-    ["optional types", "let x = no int; x = some 100;"],
-    ["random with array literals, ints", "print(random [1,2,3]);"],
-    ["random with array literals, strings", 'print(random ["a", "b"]);'],
-    ["random on array variables", "let a=[true, false];print(random a);"],
-    ["optional parameters", "function f(x: [int], y: string?) {}"],
-    ["empty optional types", "print(no [int]); print(no string);"],
-    ["types in function type", "function f(g: (int?, float)->string) {}"],
-
-    // Other tests to modify from Carlos:
-    // ["assigned functions", "block f(): \n block g = f \n g = f"],
-    // ["call of assigned functions", "block f(int x): \n block g = f \n g(1);"],
-    */
 ];
 
 // Programs that are syntactically correct but have semantic errors
@@ -178,15 +157,6 @@ const semanticErrors = [
     "int x = 1 \n block f() sends int: \n return true",
     /Type expected/,
   ],
-
-  // Optional tests:
-
-  /*
-    ["assign bad optional type", "let x=1;x=some 2;", /Cannot assign a int\? to a int/],
-    ["non-boolean conditional test", "print(1?2:3);", /Expected a boolean/],
-    ["diff types in conditional arms", "print(true?1:true);", /not have the same type/],
-    ["unwrap non-optional", "print(1??2);", /Expected an optional/],
-    */
 ];
 
 describe("The analyzer", () => {
@@ -195,11 +165,11 @@ describe("The analyzer", () => {
       assert.ok(analyze(parse(source)));
     });
   }
-  // for (const [scenario, source, errorMessagePattern] of semanticErrors) {
-  //   it(`throws on ${scenario}`, () => {
-  //     assert.throws(() => analyze(parse(source)), errorMessagePattern)
-  //   })
-  // }
+  for (const [scenario, source, errorMessagePattern] of semanticErrors) {
+    it(`throws on ${scenario}`, () => {
+      assert.throws(() => analyze(parse(source)), errorMessagePattern)
+    })
+  }
   it("produces the expected representation for a trivial program", () => {
     assert.deepEqual(
       analyze(parse("int x = 1")),

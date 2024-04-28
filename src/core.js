@@ -136,6 +136,15 @@ export function program(statements) {
   export function constructorCall(callee, args) {
     return { kind: "ConstructorCall", callee, args, type: callee }
   }
+
+  export function left_pipe_forward(callee, args) {
+    return { kind: "LeftPipeForward", callee, args }
+  }
+  
+  export function right_pipe_forward(args, callee) {
+    return { kind: "RightPipeForward", args, callee }
+  }
+  
   
   // These local constants are used to simplify the standard library definitions.
   const floatToFloatType = functionType([floatType], floatType)
