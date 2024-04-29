@@ -1,8 +1,8 @@
 block multiply(int num1, int num2) sends int:
-	send num1 * num2
+    send num1 * num2
 
 block convertBinary(int num) sends string:
-	binaryNum = "" 
+    binaryNum = "" 
     while num > 0:
         binaryNum = str(num % 2) + binaryNum 
         num = math.floor(num / 2)
