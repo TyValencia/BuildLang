@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wlogiudi/Blank.git"
+    "url": "git+https://github.com/TyValencia/BuildLang"
   },
   "keywords": [
     "compiler",
@@ -18,9 +18,9 @@
   "author": "Ty Valencia, Christine Li, and Will LoGiudice",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/wlogiudi/Blank/issues"
+    "url": "https://github.com/TyValencia/BuildLang"
   },
-  "homepage": "https://github.com/wlogiudi/Blank#readme",
+  "homepage": "https://github.com/TyValencia/BuildLang#readme",
   "devDependencies": {
     "c8": "^9.1.0",
     "c9": "^3.1.3534",

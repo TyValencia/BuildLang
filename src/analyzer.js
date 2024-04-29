@@ -1,6 +1,7 @@
 // Semantic Analyzer skeleton from Dr. Toal's Carlos project
 
 import * as core from "./core.js"
+import { intType, floatType, stringType, boolType, voidType } from './core.js';
 
 // A few declarations to save typing
 const INT = core.intType
@@ -11,20 +12,31 @@ const ANY = core.anyType
 const VOID = core.voidType
 
 class Context {
-  constructor({ parent = null, locals = new Map(), inLoop = false, function: f = null }) {
-    Object.assign(this, { parent, locals, inLoop, function: f })
+  constructor({ parent = null, locals = new Map(), inLoop = false, currentFunction = null }) {
+    this.parent = parent;
+    this.locals = locals;
+    this.inLoop = inLoop;
+    this.currentFunction = currentFunction; 
   }
+
   add(name, entity) {
-    this.locals.set(name, entity)
+    this.locals.set(name, entity);
   }
+
   lookup(name) {
-    return this.locals.get(name) || this.parent?.lookup(name)
+    return this.locals.get(name) || this.parent?.lookup(name);
   }
+
   static root() {
-    return new Context({ locals: new Map(Object.entries(core.standardLibrary)) })
+    return new Context({ locals: new Map(Object.entries(core.standardLibrary)) });
   }
+
   newChildContext(props) {
-    return new Context({ ...this, ...props, parent: this, locals: new Map() })
+    return new Context({ ...this, ...props, parent: this, locals: new Map() });
+  }
+
+  getCurrentFunction() {
+    return this.currentFunction || this.parent?.getCurrentFunction();
   }
 }
 
@@ -194,50 +206,72 @@ export default function analyze(match) {
   }
 
 
-  // Builder taken from Carlos, adapt function bodies to match correct parameters
-
   const builder = match.matcher.grammar.createSemantics().addOperation("rep", {
     Program(statements) {
       return core.program(statements.children.map(s => s.rep()))
     },
 
     VarDecl(type, id, _eq, exp) {
-      const initializer = exp.rep()
-      const readOnly = type.readOnly
-      const baseTypeRep = type.baseType.rep()
-      const variable = core.variable(id.sourceString, readOnly, baseTypeRep)
-      mustNotAlreadyBeDeclared(id.sourceString, { at: id })
-      context.add(id.sourceString, variable)
-      return core.variableDeclaration(variable, initializer)
+      const { type: baseType, readOnly } = type.rep();
+      const initializer = exp.rep();
+      const variable = core.variable(id.sourceString, readOnly, baseType);
+      mustNotAlreadyBeDeclared(id.sourceString, { at: id });
+      context.add(id.sourceString, variable);
+      return core.variableDeclaration(variable, initializer);
+    },    
+
+    FunDecl(async, _block, id, parameters, _sends, type, _colon, stmtBlock) {
+      const fun = core.fun(id.sourceString);
+      mustNotAlreadyBeDeclared(id.sourceString, { at: id });
+    
+      const params = parameters.rep();
+      const paramTypes = params.map(param => param.type);
+    
+      const returnTypeRep = type.rep();
+      fun.type = core.functionType(paramTypes, returnTypeRep);
+    
+      context.add(id.sourceString, fun);
+    
+      const functionContext = context.newChildContext({ currentFunction: fun });
+    
+      context = functionContext;
+      const body = stmtBlock.rep();
+    
+      context = functionContext.parent;
+    
+      console.log("Return type rep: ", returnTypeRep);
+      console.log("Function type set as: ", fun.type);
+      console.log("Context after restoring: ", context);
+    
+      return core.functionDeclaration(fun, params, body);
     },
     
-    FunDecl(async, _block, id, params, _sends, typeArray, _colon, stmtBlock) {
-      const fun = core.fun(id.sourceString)
-      mustNotAlreadyBeDeclared(id.sourceString, { at: id })
-      context.add(id.sourceString, fun)
-    
-      context = context.newChildContext({ inLoop: false, function: fun })
-      const paramReps = params.rep()
-    
-      const paramTypes = paramReps.map(param => param.type)
-      const returnType = typeArray.children?.[0]?.rep() ?? VOID
-      fun.type = core.functionType(paramTypes, returnType)
-    
-      const body = stmtBlock?.rep() || []
-    
-      context = context.parent
-      return core.functionDeclaration(fun, paramReps, body)
+    Param(type, id) {
+      return { kind: 'Parameter', type: type.rep(), name: id.sourceString };
     },
 
-    Param(typeArray, id) { // X 
-      const type = typeArray.rep()
-      const param = core.variable(id.sourceString, false, type)
-      context.add(id.sourceString, param)
-      return param
+    Params(_left, params, _right) {
+      return params.rep(); 
+    },
+
+    _iter(...children) {
+      return children.map(child => child.rep());
+    },
+
+    ListOf(children) {
+      return children.asIteration().children.map(child => child.rep());
+    },
+    
+    NonemptyListOf(_open, children, _close) {
+      return children.asIteration().children.map(child => child.rep());
     },
 
     TypeArray(_left, baseType, _right) { 
       return core.arrayType(baseType.rep())
+    },
+
+    Args(args) {
+      return args.children.map(child => child.rep());
     },
 
     Assignment_multipleAssignment(idList, _eq, expList) {
@@ -256,38 +290,50 @@ export default function analyze(match) {
         : core.decrement(variable)
     },
     
-    Stmt_break(_break) {
+    Stmt_break(breakKeyword) {
       mustBeInLoop({ at: breakKeyword })
       return core.breakStatement
     },
     
-    Stmt_return(sendKeyword, exp) {
-      mustBeInAFunction({ at: sendKeyword })
-      mustReturnSomething(context.function, { at: sendKeyword })
+    Stmt_return(returnKeyword, exp) {
+      mustBeInAFunction({ at: returnKeyword })
+      mustReturnSomething(context.function, { at: returnKeyword })
       const returnExpression = exp.rep()
       mustBeReturnable(returnExpression, { from: context.function }, { at: exp })
       return core.returnStatement(returnExpression)
     },
-    
-    Stmt_shortreturn(sendKeyword) {
-      mustBeInAFunction({ at: sendKeyword })
-      mustNotReturnAnything(context.function, { at: sendKeyword })
+
+    Stmt_shortreturn(returnKeyword) {
+      mustBeInAFunction({ at: returnKeyword })
+      mustNotReturnAnything(context.function, { at: returnKeyword })
       return core.shortReturnStatement()
     },
     
-    FunCall_say(say, _open, args, _close) {
-      const exp = args.asIteration().children.map(arg => arg.rep())
-      return core.say(...exp)
+    StmtBlock(statements) {
+      return statements.children.map(stmt => stmt.rep());
     },
 
-    FunCall(callee) {
-      const args = callee.args.rep()
-      mustBeCallable(callee.callee, { at: callee })
-      mustHaveCorrectArgumentCount(args.length, callee.callee.type.paramTypes.length, { at: callee })
-      args.forEach((arg, i) => mustBeAssignable(arg, { toType: callee.callee.type.paramTypes[i] }, { at: callee }))
-      return core.functionCall(callee.callee, args)
+    LoopStmt_while(_while, exp, _colon, block) {
+      const test = exp.rep()
+      mustHaveBooleanType(test, { at: exp })
+      context = context.newChildContext({ inLoop: true })
+      const body = block.rep()
+      context = context.parent
+      return core.whileStatement(test, body)
     },
     
+    IfStmt_long(_if, exp, _colon1, block1, _else, _colon2, block2) {
+      const test = exp.rep()
+      mustHaveBooleanType(test, { at: exp })
+      context = context.newChildContext()
+      const consequent = block1.rep()
+      context = context.parent
+      context = context.newChildContext()
+      const alternate = block2.rep()
+      context = context.parent
+      return core.ifStatement(test, consequent, alternate)
+    },
+
     IfStmt_elseif(_if, exp, _colon, block, _else, trailingIfStatement) {
       const test = exp.rep()
       mustHaveBooleanType(test, { at: exp })
@@ -296,6 +342,88 @@ export default function analyze(match) {
       const alternate = trailingIfStatement.rep()
       context = context.parent
       return core.ifStatement(test, consequent, alternate)
+    },
+
+    IfStmt_short(_if, exp, _colon, block) {
+      const test = exp.rep()
+      mustHaveBooleanType(test, { at: exp })
+      context = context.newChildContext()
+      const consequent = block.rep()
+      context = context.parent
+      return core.shortIfStatement(test, consequent)
+    },
+
+    LoopStmt_while(_while, exp, _colon, block) {
+      const test = exp.rep()
+      mustHaveBooleanType(test, { at: exp })
+      context = context.newChildContext({ inLoop: true })
+      const body = block.rep()
+      context = context.parent
+      return core.whileStatement(test, body)
+    },
+
+    LoopStmt_repeat(_repeat, exp, _colon, block) {
+      const count = exp.rep()
+      mustHaveIntegerType(count, { at: exp })
+      context = context.newChildContext({ inLoop: true })
+      const body = block.rep()
+      context = context.parent
+      return core.repeatStatement(count, body)
+    },
+
+    LoopStmt_range(_for, id, _in, exp1, op, exp2, _colon, block) {
+      const [low, high] = [exp1.rep(), exp2.rep()]
+      mustHaveIntegerType(low, { at: exp1 })
+      mustHaveIntegerType(high, { at: exp2 })
+      const iterator = core.variable(id.sourceString, INT, true)
+      context = context.newChildContext({ inLoop: true })
+      context.add(id.sourceString, iterator)
+      const body = block.rep()
+      context = context.parent
+      return core.forRangeStatement(iterator, low, op.sourceString, high, body)
+    },
+
+    LoopStmt_collection(_for, id, _in, exp, _colon, block) {
+      const collection = exp.rep()
+      mustHaveAnArrayType(collection, { at: exp })
+      const iterator = core.variable(id.sourceString, true, collection.type.baseType)
+      context = context.newChildContext({ inLoop: true })
+      context.add(iterator.name, iterator)
+      const body = block.rep()
+      context = context.parent
+      return core.forStatement(iterator, collection, body)
+    },
+
+
+    Exp_or(exp, _ops, exps) {
+      let left = exp.rep()
+      mustHaveBooleanType(left, { at: exp })
+      for (let e of exps.children) {
+        let right = e.rep()
+        mustHaveBooleanType(right, { at: e })
+        left = core.binary("||", left, right, BOOLEAN)
+      }
+      return left
+    },
+
+    Exp_and(exp, _ops, exps) {
+      let left = exp.rep()
+      mustHaveBooleanType(left, { at: exp })
+      for (let e of exps.children) {
+        let right = e.rep()
+        mustHaveBooleanType(right, { at: e })
+        left = core.binary("&&", left, right, BOOLEAN)
+      }
+      return left
+    },
+
+    Exp1_compare(exp1, relop, exp2) {
+      const [left, op, right] = [exp1.rep(), relop.sourceString, exp2.rep()]
+      if (["<", "<=", ">", ">="].includes(op)) {
+        mustHaveNumericOrStringType(left, { at: exp1 })
+      }
+      mustBothHaveTheSameType(left, right, { at: relop })
+      return core.binary(op, left, right, BOOLEAN)
     },
     
     Exp2_binary(exp1, addOp, exp2) {
@@ -322,24 +450,49 @@ export default function analyze(match) {
       mustBothHaveTheSameType(left, right, { at: powerOp })
       return core.binary(op, left, right, left.type)
     },
-    
-    FunCall_left_pipe_forward(calleeList, _pipe, primaryList) {
-      const args = primaryList.rep()
-      const funs = calleeList.asIteration().children.map(callee => callee.rep())
-      funs.forEach(fun => mustBeCallable(fun, { at: calleeList }))
-      mustHaveCorrectArgumentCount(args.length, funs[funs.length - 1].type.paramTypes.length, { at: calleeList })
-      args.forEach((arg, i) => mustBeAssignable(arg, { toType: funs[funs.length - 1].type.paramTypes[i] }, { at: calleeList }))
-      return funs.reduceRight((result, fun) => core.left_pipe_forward(fun, [result]), args[0])
+
+    Exp4_negation(_op, exp) {
+      const operand = exp.rep()
+      mustHaveNumericType(operand, { at: exp })
+      return core.binary("-", core.int(0), operand, operand.type)
     },
     
-    FunCall_right_pipe_forward(primaryList, _pipe, calleeList) {
-      const args = primaryList.rep()
-      const funs = calleeList.asIteration().children.map(callee => callee.rep())
-      funs.forEach(fun => mustBeCallable(fun, { at: calleeList }))
-      mustHaveCorrectArgumentCount(args.length, funs[0].type.paramTypes.length, { at: calleeList })
-      args.forEach((arg, i) => mustBeAssignable(arg, { toType: funs[0].type.paramTypes[i] }, { at: calleeList }))
-      return funs.reduce((result, fun) => core.right_pipe_forward([result], fun), args[0])
-    },
+    // FunCall_say(say, _open, args, _close) {
+    //   console.log("FunCall_say triggered"); 
+    //   const sayFunction = this.lookup('say');
+    //   if (!sayFunction) {
+    //       throw new Error("Function 'say' is not defined.");
+    //   }
+  
+    //   const argumentExpressions = args.rep();
+    //   return core.functionCall(sayFunction, argumentExpressions);
+    // },
+
+    // FunCall(callee) {
+    //   const args = callee.args.rep()
+    //   mustBeCallable(callee.callee, { at: callee })
+    //   mustHaveCorrectArgumentCount(args.length, callee.callee.type.paramTypes.length, { at: callee })
+    //   args.forEach((arg, i) => mustBeAssignable(arg, { toType: callee.callee.type.paramTypes[i] }, { at: callee }))
+    //   return core.functionCall(callee.callee, args)
+    // },
+
+    // FunCall_left_pipe_forward(calleeList, _pipe, primaryList) {
+    //   const args = primaryList.rep()
+    //   const funs = calleeList.asIteration().children.map(callee => callee.rep())
+    //   funs.forEach(fun => mustBeCallable(fun, { at: calleeList }))
+    //   mustHaveCorrectArgumentCount(args.length, funs[funs.length - 1].type.paramTypes.length, { at: calleeList })
+    //   args.forEach((arg, i) => mustBeAssignable(arg, { toType: funs[funs.length - 1].type.paramTypes[i] }, { at: calleeList }))
+    //   return funs.reduceRight((result, fun) => core.left_pipe_forward(fun, [result]), args[0])
+    // },
+    
+    // FunCall_right_pipe_forward(primaryList, _pipe, calleeList) {
+    //   const args = primaryList.rep()
+    //   const funs = calleeList.asIteration().children.map(callee => callee.rep())
+    //   funs.forEach(fun => mustBeCallable(fun, { at: calleeList }))
+    //   mustHaveCorrectArgumentCount(args.length, funs[0].type.paramTypes.length, { at: calleeList })
+    //   args.forEach((arg, i) => mustBeAssignable(arg, { toType: funs[0].type.paramTypes[i] }, { at: calleeList }))
+    //   return funs.reduce((result, fun) => core.right_pipe_forward([result], fun), args[0])
+    // },
 
     // Primary taken from Carlos' Exp9, should follow exact same format
     Primary_emptyarray(ty, _open, _close) {
@@ -368,13 +521,6 @@ export default function analyze(match) {
     Primary_member(exp, dot, id) {
       const object = exp.rep()
       let structType
-      if (dot.sourceString === "?.") {
-        mustHaveAnOptionalStructType(object, { at: exp })
-        structType = object.type.baseType
-      } else {
-        mustHaveAStructType(object, { at: exp })
-        structType = object.type
-      }
       mustHaveMember(structType, id.sourceString, { at: id })
       const field = structType.fields.find(f => f.name === id.sourceString)
       return core.memberExpression(object, dot.sourceString, field)
@@ -413,6 +559,33 @@ export default function analyze(match) {
       return false
     },
 
+    type_read_only_symbol(dollar, actualType) {
+      return {
+        type: actualType.rep(),
+        readOnly: dollar.sourceString === '$'
+      };
+    },
+
+    int(_) {
+      return intType; 
+    },
+
+    float(_) {
+      return floatType; 
+    },
+
+    string(_) {
+      return stringType; 
+    },
+
+    bool(_) {
+      return boolType; 
+    },
+
+    void(_) {
+      return voidType; 
+    },
+
     intlit(_digits) {
       return BigInt(this.sourceString)
     },
@@ -428,3 +601,4 @@ export default function analyze(match) {
 
   return builder(match).rep()
 }
+ 
