@@ -133,6 +133,12 @@ export function program(statements) {
     return { kind: "ConstructorCall", callee, args, type: callee }
   }
 
+  export function sequence(operations) {
+    operations.forEach(operation => {
+    });
+    return operations; 
+}
+
   // export function left_pipe_forward(callee, args) {
   //   return { kind: "LeftPipeForward", callee, args }
   // }

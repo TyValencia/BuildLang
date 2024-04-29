@@ -20,7 +20,7 @@ BuildLang {
     Param       = (type | TypeArray) id
     TypeArray   = ("[")* type ("]")* 
     Assignment  = NonemptyListOf<id, ","> "=" NonemptyListOf<Exp, ",">       -- multipleAssignment
-                | id "=" Exp                                                 -- assignment
+                | Primary "=" Exp                                            -- assignment
     // FunCall     = say "(" Args ")"                                           -- say
     //             | ((say | id) "<|")+ PrimaryList                             -- left_pipe_forward
     //             | PrimaryList ("|>" (say | id))+                             -- right_pipe_forward
@@ -31,8 +31,8 @@ BuildLang {
                 | if Exp ":" StmtBlock else IfStmt                           -- elseif
                 | if Exp ":" StmtBlock                                       -- short
     LoopStmt    = while Exp ":" StmtBlock                                    -- while
-                | stack (id|intlit) ":" StmtBlock                         	 -- repeat
-                | for id in Exp ("..." | "..<") Exp ":" StmtBlock            -- range
+                | stack intlit ":" StmtBlock                              	 -- repeat
+                | for id in intlit ("..." | "..<") intlit ":" StmtBlock      -- range
                 | for id in Exp ":" StmtBlock                                -- collection
 
     StmtBlock   = Stmt+

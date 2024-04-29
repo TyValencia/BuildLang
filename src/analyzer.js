@@ -274,12 +274,27 @@ export default function analyze(match) {
       return args.children.map(child => child.rep());
     },
 
+    Assignment_assignment(id, _eq, expression) {
+      const variable = context.lookup(id.sourceString);
+      mustHaveBeenFound(variable, id.sourceString, { at: id }); 
+      const exprValue = expression.rep();
+      mustBeAssignable(exprValue, { toType: variable.type }, { at: id });
+      return core.assignment(variable, exprValue);
+    },
+
     Assignment_multipleAssignment(idList, _eq, expList) {
-      const ids = idList.asIteration().children.map(id => id.sourceString)
-      const exps = expList.asIteration().children.map(exp => exp.rep())
-      const variables = ids.map(id => context.lookup(id))
-      const assignments = variables.map((variable, i) => core.assignment(variable, exps[i]))
-      return core.sequence(assignments)
+      const ids = idList.asIteration().children.map(id => id.sourceString);
+      const exps = expList.asIteration().children.map(exp => exp.rep());
+      const variables = ids.map(id => {
+          const variable = context.lookup(id);
+          mustHaveBeenFound(variable, id, { at: idList }); 
+          return variable;
+      });
+      const assignments = variables.map((variable, i) => {
+          mustBeAssignable(exps[i], { toType: variable.type }, { at: idList });
+          return core.assignment(variable, exps[i]);
+      });
+      return core.sequence(assignments); 
     },
 
     Stmt_bump(exp, operator) {
@@ -311,15 +326,6 @@ export default function analyze(match) {
     
     StmtBlock(statements) {
       return statements.children.map(stmt => stmt.rep());
-    },
-
-    LoopStmt_while(_while, exp, _colon, block) {
-      const test = exp.rep()
-      mustHaveBooleanType(test, { at: exp })
-      context = context.newChildContext({ inLoop: true })
-      const body = block.rep()
-      context = context.parent
-      return core.whileStatement(test, body)
     },
     
     IfStmt_long(_if, exp, _colon1, block1, _else, _colon2, block2) {
