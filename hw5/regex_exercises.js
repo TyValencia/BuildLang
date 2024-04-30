@@ -7,8 +7,8 @@ const regexes = {
     eightThroughThirtyTwo: /^(8|9|1\d|2\d|3[0-2])$/,
     notPythonPycharmPyc: /^(?!.*\b(python|pycharm|pyc)\b).*$/u,
     restrictedFloats:  /^\d+(\.\d*)?[eE][+-]?\d{1,3}$/i,
-    palindromes2358: /^ ........ $/,
-    pythonStringLiterals: /^ ........ $/,
+    palindromes2358: /^(?:(.)\1|(.).\2|(.)(.).\4\3|(.)(.)(.)(.)\8\7\6\5)$/u,
+    pythonStringLiterals: /^(r|u|R|U|f|F|rf|fr|b|B|br|Br|bR|BR|rf|FR|Rf|RF|rb|Rb|rB|RB)?(?:'(?:\\.|[^'\\\n])*'|"(?:\\.|[^"\\\n])*"|'''(?:\\.|[^\\])*'''|"""(?:\\.|[^\\])*""")$/,
   }
   
   export function matches(name, string) {

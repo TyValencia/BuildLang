@@ -12,31 +12,20 @@ const ANY = core.anyType
 const VOID = core.voidType
 
 class Context {
-  constructor({ parent = null, locals = new Map(), inLoop = false, currentFunction = null }) {
-    this.parent = parent;
-    this.locals = locals;
-    this.inLoop = inLoop;
-    this.currentFunction = currentFunction; 
+  constructor({ parent = null, locals = new Map(), inLoop = false, function: f = null }) {
+    Object.assign(this, { parent, locals, inLoop, function: f })
   }
-
   add(name, entity) {
-    this.locals.set(name, entity);
+    this.locals.set(name, entity)
   }
-
   lookup(name) {
-    return this.locals.get(name) || this.parent?.lookup(name);
+    return this.locals.get(name) || this.parent?.lookup(name)
   }
-
   static root() {
-    return new Context({ locals: new Map(Object.entries(core.standardLibrary)) });
+    return new Context({ locals: new Map(Object.entries(core.standardLibrary)) })
   }
-
   newChildContext(props) {
-    return new Context({ ...this, ...props, parent: this, locals: new Map() });
-  }
-
-  getCurrentFunction() {
-    return this.currentFunction || this.parent?.getCurrentFunction();
+    return new Context({ ...this, ...props, parent: this, locals: new Map() })
   }
 }
 
@@ -140,18 +129,12 @@ export default function analyze(match) {
         return "bool"
       case "VoidType":
         return "void"
-      case "AnyType":
-        return "any"
-      case "StructType":
-        return type.name
       case "FunctionType":
         const paramTypes = type.paramTypes.map(typeDescription).join(", ")
         const returnType = typeDescription(type.returnType)
         return `(${paramTypes})->${returnType}`
       case "ArrayType":
         return `[${typeDescription(type.baseType)}]`
-      case "OptionalType":
-        return `${typeDescription(type.baseType)}?`
     }
   }
 
@@ -164,11 +147,6 @@ export default function analyze(match) {
 
   function mustNotBeReadOnly(e, at) {
     must(!e.readOnly, `Cannot assign to constant ${e.name}`, at)
-  }
-
-  function mustHaveDistinctFields(type, at) {
-    const fieldNames = new Set(type.fields.map(f => f.name))
-    must(fieldNames.size === type.fields.length, "Fields must be distinct", at)
   }
 
   function mustHaveMember(structType, field, at) {
@@ -262,25 +240,17 @@ export default function analyze(match) {
       return children.asIteration().children.map(child => child.rep());
     },
     
-    NonemptyListOf(_open, children, _close) {
-      return children.asIteration().children.map(child => child.rep());
-    },
+    // NonemptyListOf(_open, children, _close) {
+    //   return children.asIteration().children.map(child => child.rep());
+    // },
 
     TypeArray(_left, baseType, _right) { 
       return core.arrayType(baseType.rep())
     },
 
-    Args(args) {
-      return args.children.map(child => child.rep());
-    },
-
-    Assignment_assignment(id, _eq, expression) {
-      const variable = context.lookup(id.sourceString);
-      mustHaveBeenFound(variable, id.sourceString, { at: id }); 
-      const exprValue = expression.rep();
-      mustBeAssignable(exprValue, { toType: variable.type }, { at: id });
-      return core.assignment(variable, exprValue);
-    },
+    // Args(args) {
+    //   return args.children.map(child => child.rep());
+    // },
 
     Assignment_multipleAssignment(idList, _eq, expList) {
       const ids = idList.asIteration().children.map(id => id.sourceString);
@@ -586,10 +556,6 @@ export default function analyze(match) {
 
     bool(_) {
       return boolType; 
-    },
-
-    void(_) {
-      return voidType; 
     },
 
     intlit(_digits) {

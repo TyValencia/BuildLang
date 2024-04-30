@@ -12,20 +12,12 @@ export function program(statements) {
     return { kind: "Variable", name, readOnly, type }
   }
   
-  export function typeDeclaration(type) {
-    return { kind: "TypeDeclaration", type }
-  }
-  
   export const boolType = { kind: "BoolType" }
   export const intType = { kind: "IntType" }
   export const floatType = { kind: "FloatType" }
   export const stringType = { kind: "StringType" }
   export const voidType = { kind: "VoidType" }
   export const anyType = { kind: "AnyType" }
-  
-  export function field(name, type) {
-    return { kind: "Field", name, type }
-  }
   
   export function functionDeclaration(fun, params, body) {
     return { kind: "FunctionDeclaration", fun, params, body }
@@ -41,10 +33,6 @@ export function program(statements) {
   
   export function functionType(paramTypes, returnType) {
     return { kind: "FunctionType", paramTypes, returnType }
-  }
-  
-  export function optionalType(baseType) {
-    return { kind: "OptionalType", baseType }
   }
   
   export function increment(variable) {
@@ -93,20 +81,8 @@ export function program(statements) {
     return { kind: "ForStatement", iterator, collection, body }
   }
   
-  export function conditional(test, consequent, alternate, type) {
-    return { kind: "Conditional", test, consequent, alternate, type }
-  }
-  
   export function binary(op, left, right, type) {
     return { kind: "BinaryExpression", op, left, right, type }
-  }
-  
-  export function unary(op, operand, type) {
-    return { kind: "UnaryExpression", op, operand, type }
-  }
-  
-  export function emptyOptional(baseType) {
-    return { kind: "EmptyOptional", baseType, type: optionalType(baseType) }
   }
   
   export function subscript(array, index) {
@@ -127,10 +103,6 @@ export function program(statements) {
   
   export function functionCall(callee, args) {
     return { kind: "FunctionCall", callee, args, type: callee.type.returnType }
-  }
-  
-  export function constructorCall(callee, args) {
-    return { kind: "ConstructorCall", callee, args, type: callee }
   }
 
   export function sequence(operations) {

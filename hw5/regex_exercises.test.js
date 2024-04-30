@@ -59,57 +59,57 @@ const testFixture = {
     good: ["1e0", "235e9", "1.0e1", "1.0e+122", "55e20"],
     bad: ["3.5E9999", "2.355e-9991", "1e2210"],
   },
-//   palindromes2358: {
-//     good: [
-//       "aa",
-//       "bb",
-//       "cc",
-//       "aaa",
-//       "aba",
-//       "aca",
-//       "bab",
-//       "bbb",
-//       "ababa",
-//       "abcba",
-//       "aaaaaaaa",
-//       "abaaaaba",
-//       "cbcbbcbc",
-//       "caaaaaac",
-//     ],
-//     bad: ["", "a", "ab", "abc", "abbbb", "cbcbcbcb"],
-//   },
-//   pythonStringLiterals: {
-//     good: String.raw`''
-//       ""
-//       'hello'
-//       "world"
-//       'a\'b'
-//       "a\"b"
-//       '\n'
-//       "a\tb"
-//       f'\u'
-//       """abc"""
-//       '''a''"''"'''
-//       """abc\xdef"""
-//       '''abc\$def'''
-//       '''abc\''''`
-//       .split("\n")
-//       .map((s) => s.trim()),
-//     bad: String.raw`
-//       'hello"
-//       "world'
-//       'a'b'
-//       "a"b"
-//       'a''
-//       "x""
-//       """"""""
-//       frr"abc"
-//       'a\'
-//       '''abc''''
-//       """`
-//       .split("\n")
-//       .map((s) => s.trim()),
-//   },
+  palindromes2358: {
+    good: [
+      "aa",
+      "bb",
+      "cc",
+      "aaa",
+      "aba",
+      "aca",
+      "bab",
+      "bbb",
+      "ababa",
+      "abcba",
+      "aaaaaaaa",
+      "abaaaaba",
+      "cbcbbcbc",
+      "caaaaaac",
+    ],
+    bad: ["", "a", "ab", "abc", "abbbb", "cbcbcbcb"],
+  },
+  pythonStringLiterals: {
+    good: String.raw`''
+      ""
+      'hello'
+      "world"
+      'a\'b'
+      "a\"b"
+      '\n'
+      "a\tb"
+      f'\u'
+      """abc"""
+      '''a''"''"'''
+      """abc\xdef"""
+      '''abc\$def'''
+      '''abc\''''`
+      .split("\n")
+      .map((s) => s.trim()),
+    bad: String.raw`
+      'hello"
+      "world'
+      'a'b'
+      "a"b"
+      'a''
+      "x""
+      """"""""
+      frr"abc"
+      'a\'
+      '''abc''''
+      """`
+      .split("\n")
+      .map((s) => s.trim()),
+  },
 }
 
 for (let name of Object.keys(testFixture)) {
