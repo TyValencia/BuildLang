@@ -79,6 +79,17 @@ const tests = [
   ["optimizes in subscripts", sub(a, onePlusTwo), sub(a, 3)],
   ["optimizes in array literals", array(0, onePlusTwo, 9), array(0, 3, 9)],
   ["optimizes in arguments", callIdentity([times(3, 5)]), callIdentity([15])],
+  ["optimizes unary negation of a number", core.unary("-", 10), -10],
+  ["optimizes constructor call with no args", core.constructorCall(identity, []), core.constructorCall(identity, [])],
+  ["optimizes constructor call arguments", core.constructorCall(identity, [core.binary("+", 5, 3)]), core.constructorCall(identity, [8])],
+  ["passes through unary expression unchanged when operand is not a number", core.unary("-", core.variable("x", false, core.intType)), core.unary("-", core.variable("x", false, core.intType))],
+  ["passes through conditional expression unchanged when test is not boolean", core.conditional(core.variable("x", false, core.boolType), 10, 20), core.conditional(core.variable("x", false, core.boolType), 10, 20)],
+  ["executes for loop normally when collection is not empty", core.forStatement(x, array(1, 2, 3), [core.increment(x)]), core.forStatement(x, array(1, 2, 3), [core.increment(x)])],
+  ["executes for-range loop normally when low <= high", core.forRangeStatement(x, 1, "..<", 5, [core.increment(x)]), core.forRangeStatement(x, 1, "..<", 5, [core.increment(x)])],
+  ["executes repeat loop normally when count > 0", core.repeatStatement(5, [core.increment(x)]), core.repeatStatement(5, [core.increment(x)])],
+  ["executes while loop normally when condition is true", core.whileStatement(true, [core.increment(x)]), core.whileStatement(true, [core.increment(x)])],
+  ["returns full if statement when condition is non-boolean", core.ifStatement(x, [core.increment(x)], [core.decrement(x)]), core.ifStatement(x, [core.increment(x)], [core.decrement(x)])],
+  ["returns full short if statement when condition is non-boolean", core.shortIfStatement(x, [core.increment(x)]), core.shortIfStatement(x, [core.increment(x)])],
   [
     "passes through nonoptimizable constructs",
     ...Array(2).fill([

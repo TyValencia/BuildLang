@@ -23,10 +23,6 @@ export function program(statements) {
   export const voidType = { kind: "VoidType" }
   export const anyType = { kind: "AnyType" }
   
-  export function structType(name, fields) {
-    return { kind: "StructType", name, fields }
-  }
-  
   export function field(name, type) {
     return { kind: "Field", name, type }
   }
@@ -137,13 +133,19 @@ export function program(statements) {
     return { kind: "ConstructorCall", callee, args, type: callee }
   }
 
-  export function left_pipe_forward(callee, args) {
-    return { kind: "LeftPipeForward", callee, args }
-  }
+  export function sequence(operations) {
+    operations.forEach(operation => {
+    });
+    return operations; 
+}
+
+  // export function left_pipe_forward(callee, args) {
+  //   return { kind: "LeftPipeForward", callee, args }
+  // }
   
-  export function right_pipe_forward(args, callee) {
-    return { kind: "RightPipeForward", args, callee }
-  }
+  // export function right_pipe_forward(args, callee) {
+  //   return { kind: "RightPipeForward", args, callee }
+  // }
   
   
   // These local constants are used to simplify the standard library definitions.
@@ -161,6 +163,7 @@ export function program(statements) {
     any: anyType,
     π: variable("π", true, floatType),
     print: fun("print", anyToVoidType),
+    say: fun("say", functionType([anyType], voidType)),
     sin: fun("sin", floatToFloatType),
     cos: fun("cos", floatToFloatType),
     exp: fun("exp", floatToFloatType),
