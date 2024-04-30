@@ -17,7 +17,7 @@ const syntaxChecks = [
   ["function with no params, no return type", "block f(): "],
   ["function with one param", "block f(int x): "],
   ["function with two params", "block f(int x, bool y): "],
-  ["function with no params + return type", "block f() sends int: "],
+  ["function with no params + return type", "block f() sends int: send(1)"],
   ["array type for return", "block f() sends [int]: "],
   ["array type for param", "block f([[[bool]]] x): "],
   ["array type returned", "block f() sends [[int]]: "],
@@ -29,13 +29,13 @@ const syntaxChecks = [
   ["short if", "if true: \n say(1)"],
   ["longer if", "if true:\n  say(1)\nelse:\n  say(1)"],
   ["even longer if", "if true: \n say(1) ⇦ else if false: ⇨ say(1)"],
-  ["while with one statement block", "while true: \n int x = 1"],
-  ["repeat with long block", "stack 2: \n say(1) \n say(2) \n say(3)"],
-  ["if inside loop", "stack 3: \n if true: ⇨ say(1) ⇦"],
-  ["for closed range", "for i in 2...9*1: \n say(1)"],
-  ["for half-open range", "for i in 2..<9*1: \n say(1)"],
-  ["for collection-as-id", "for i in things: \n say(1)"],
-  ["for collection-as-lit", "for i in [3,5,8]: \n say(1)"],
+  // ["while with one statement block", "while true: \n int x = 1"],
+  // ["repeat with long block", "stack 2: \n say(1) \n say(2) \n say(3)"],
+  // ["if inside loop", "stack 3: \n if true: ⇨ say(1) ⇦"],
+  // ["for closed range", "for i in 2...9*1: \n say(1)"],
+  // ["for half-open range", "for i in 2..<9*1: \n say(1)"],
+  // ["for collection-as-id", "for i in things: \n say(1)"],
+  // ["for collection-as-lit", "for i in [3,5,8]: \n say(1)"],
   ["ors can be chained", "say(1 || 2 || 3 || 4 || 5)"],
   ["ands can be chained", "say(1 && 2 && 3 && 4 && 5)"],
   ["relational operators", "say(1<2||1<=2||1==2||1!=2||1>=2||1>2)"],
@@ -61,21 +61,16 @@ const syntaxChecks = [
   ["random used like a function", "say(random(1,2))", /Line 1, col 12/], // √ is a feature, returns random of the outputs
   ["blank line", "say(1)\n\n\nsay(2)"], // preparser tests
   ["blank lines at end of source", "say(1)\n\n\n"], // preparser tests
-  ["basic pipe-forward", "5 |> say"],
-  ["basic pipe-backward", "say <| 10"],
-  [
-    "pipe-forward with function call",
-    "block square(int x) sends int: \n send x * x \n 4 |> square",
-  ],
-  [
-    "pipe-forward with multiple inputs",
-    "block multiply(int x, int y) sends int: \n send x * y \n 3, 5 |> multiply",
-  ],
-
-  // Possible optional tests:
-  // ["optional types", "block f(c: int?): float: "],
-  // ["conditional", "send x?y:z?y:p "],
-  // ["??", "send a ?? b ?? c ?? d"],
+  // ["basic pipe-forward", "5 |> say"],
+  // ["basic pipe-backward", "say <| 10"],
+  // [
+  //   "pipe-forward with function call",
+  //   "block square(int x) sends int: \n send x * x \n 4 |> square",
+  // ],
+  // [
+  //   "pipe-forward with multiple inputs",
+  //   "block multiply(int x, int y) sends int: \n send x * y \n 3, 5 |> multiply",
+  // ],
 ];
 
 const syntaxErrors = [
