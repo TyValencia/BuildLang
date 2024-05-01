@@ -205,21 +205,17 @@ export default function analyze(match) {
       const params = parameters.rep();
       const paramTypes = params.map(param => param.type);
     
-      const returnTypeRep = type.rep();
+      const returnTypeRep = type.rep()?.[0]?.type ?? core.voidType; 
+
       fun.type = core.functionType(paramTypes, returnTypeRep);
     
       context.add(id.sourceString, fun);
     
-      const functionContext = context.newChildContext({ currentFunction: fun });
+      context = context.newChildContext({ function: fun });
     
-      context = functionContext;
       const body = stmtBlock.rep();
     
-      context = functionContext.parent;
-    
-      console.log("Return type rep: ", returnTypeRep);
-      console.log("Function type set as: ", fun.type);
-      console.log("Context after restoring: ", context);
+      context = context.parent;
     
       return core.functionDeclaration(fun, params, body);
     },

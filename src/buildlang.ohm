@@ -15,7 +15,7 @@ BuildLang {
 
     VarDecl     = type id "=" Exp 
     type        = ("$")? (int | float | string | bool | void)                -- read_only_symbol
-    FunDecl     = (async)? block id Params (sends TypeArray)? ":" (StmtBlock)?
+    FunDecl     = (async)? block id Params (sends type)? ":" Stmt*
     Params      = "(" ListOf<Param, ","> ")"
     Param       = (type | TypeArray) id
     TypeArray   = ("[")* type ("]")* 

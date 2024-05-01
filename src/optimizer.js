@@ -148,9 +148,9 @@ const optimizers = {
     e.right = optimize(e.right)
     if (e.op === "??") {
       // Coalesce Empty Optional Unwraps
-      if (e.left?.kind === "EmptyOptional") {
-        return e.right
-      }
+      // if (e.left?.kind === "EmptyOptional") {
+      //   return e.right
+      // }
     } else if (e.op === "&&") {
       // Optimize boolean constants in && and ||
       if (e.left === true) return e.right

@@ -16,13 +16,13 @@ const semanticChecks = [
   ["basic assignment", "int x = 1"],
   ["print statement", "say(1)"],
   ["short return", "block f(): say(1)"],
-  // ["long return", "block f() sends bool: send true"], // ****
+  ["long return", "block f() sends bool: send true"], // ****
   ["variable declarations", "int x = 1 bool y = false"],
   ["increment and decrement", "int x = 10 x-- x++"],
   ["initialize array", "int a = [1, 2, 3]"],
   ["assign arrays", "int a = [1] int b = [1]"],
   // ["assign to array element", "int a = [1, 2, 3] a[1] = 100"],
-  // ["return in nested if", "block f() sends float: if true: send(1.0) else: send(2.0)"],
+  ["return in nested if", "block f() sends float: if true: send(1.0) else: send(2.0)"],
   ["break in nested if", "while false: if true: break"],
   ["long if", "if true: say(1) else: say(3)"],
   ["elseif", "if true: say(1) else if true: say(0) else: say(3)"],
