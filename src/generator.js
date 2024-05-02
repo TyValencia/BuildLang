@@ -5,13 +5,10 @@
 import { voidType, standardLibrary } from "./core.js"
 
 export default function generate(program) {
-  // When generating code for statements, we'll accumulate the lines of
-  // the target code here. When we finish generating, we'll join the lines
-  // with newlines and return the result.
   const output = []
 
   const standardFunctions = new Map([
-    [standardLibrary.print, x => `console.log(${x})`],
+    [standardLibrary.say, x => `console.log(${x})`],
     [standardLibrary.sin, x => `Math.sin(${x})`],
     [standardLibrary.cos, x => `Math.cos(${x})`],
     [standardLibrary.exp, x => `Math.exp(${x})`],
@@ -21,10 +18,6 @@ export default function generate(program) {
     [standardLibrary.codepoints, s => `[...(${s})].map(s=>s.codePointAt(0))`],
   ])
 
-  // Variable and function names in JS will be suffixed with _1, _2, _3,
-  // etc. This is because "switch", for example, is a legal name in Carlos,
-  // but not in JS. So, the Carlos variable "switch" must become something
-  // like "switch_1". We handle this by mapping each name to its suffix.
   const targetName = (mapping => {
     return entity => {
       if (!mapping.has(entity)) {
@@ -37,31 +30,11 @@ export default function generate(program) {
   const gen = node => generators?.[node?.kind]?.(node) ?? node
 
   const generators = {
-    // Key idea: when generating an expression, just return the JS string; when
-    // generating a statement, write lines of translated JS to the output array.
     Program(p) {
       p.statements.forEach(gen)
     },
     VariableDeclaration(d) {
-      // We don't care about const vs. let in the generated code! The analyzer has
-      // already checked that we never updated a const, so let is always fine.
       output.push(`let ${gen(d.variable)} = ${gen(d.initializer)};`)
-    },
-    TypeDeclaration(d) {
-      // The only type declaration in Carlos is the struct! Becomes a JS class.
-      output.push(`class ${gen(d.type)} {`)
-      output.push(`constructor(${d.type.fields.map(gen).join(",")}) {`)
-      for (let field of d.type.fields) {
-        output.push(`this[${JSON.stringify(gen(field))}] = ${gen(field)};`)
-      }
-      output.push("}")
-      output.push("}")
-    },
-    StructType(t) {
-      return targetName(t)
-    },
-    Field(f) {
-      return targetName(f)
     },
     FunctionDeclaration(d) {
       output.push(`function ${gen(d.fun)}(${d.params.map(gen).join(", ")}) {`)
@@ -69,7 +42,6 @@ export default function generate(program) {
       output.push("}")
     },
     Variable(v) {
-      // Standard library constants just get special treatment
       if (v === standardLibrary.π) return "Math.PI"
       return targetName(v)
     },
@@ -117,7 +89,6 @@ export default function generate(program) {
       output.push("}")
     },
     RepeatStatement(s) {
-      // JS can only repeat n times if you give it a counter variable!
       const i = targetName({ name: "i" })
       output.push(`for (let ${i} = 0; ${i} < ${gen(s.count)}; ${i}++) {`)
       s.body.forEach(gen)
@@ -135,26 +106,18 @@ export default function generate(program) {
       s.body.forEach(gen)
       output.push("}")
     },
-    Conditional(e) {
-      return `((${gen(e.test)}) ? (${gen(e.consequent)}) : (${gen(e.alternate)}))`
-    },
     BinaryExpression(e) {
       const op = { "==": "===", "!=": "!==" }[e.op] ?? e.op
       return `(${gen(e.left)} ${op} ${gen(e.right)})`
     },
     UnaryExpression(e) {
       const operand = gen(e.operand)
-      if (e.op === "some") {
-        return operand
-      } else if (e.op === "#") {
-        return `${operand}.length`
-      } else if (e.op === "random") {
+      if (e.op === "random") {
         return `((a=>a[~~(Math.random()*a.length)])(${operand}))`
+      } else if (e.op === "len") {
+        return `${operand}.length`
       }
       return `${e.op}(${operand})`
-    },
-    EmptyOptional(e) {
-      return "undefined"
     },
     SubscriptExpression(e) {
       return `${gen(e.array)}[${gen(e.index)}]`
@@ -175,14 +138,10 @@ export default function generate(program) {
       const targetCode = standardFunctions.has(c.callee)
         ? standardFunctions.get(c.callee)(c.args.map(gen))
         : `${gen(c.callee)}(${c.args.map(gen).join(", ")})`
-      // Calls in expressions vs in statements are handled differently
       if (c.callee.type.returnType !== voidType) {
         return targetCode
       }
       output.push(`${targetCode};`)
-    },
-    ConstructorCall(c) {
-      return `new ${gen(c.callee)}(${c.args.map(gen).join(", ")})`
     },
   }
 
