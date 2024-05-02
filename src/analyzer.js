@@ -80,10 +80,6 @@ export default function analyze(match) {
     )
   }
 
-  function mustBeAType(e, at) {
-    must(e?.kind.endsWith("Type"), "Type expected", at)
-  }
-
   function mustBeAnArrayType(t, at) {
     must(t?.kind === "ArrayType", "Must be an array type", at)
   }
@@ -149,10 +145,6 @@ export default function analyze(match) {
     must(!e.readOnly, `Cannot assign to constant ${e.name}`, at)
   }
 
-  function mustHaveMember(structType, field, at) {
-    must(structType.fields.map(f => f.name).includes(field), "No such field", at)
-  }
-
   function mustBeInLoop(at) {
     must(context.inLoop, "Break can only appear in a loop", at)
   }
@@ -167,7 +159,8 @@ export default function analyze(match) {
   }
 
   function mustNotReturnAnything(f, at) {
-    must(f.type.returnType === VOID, "Something should be returned", at)
+    const expectedTypeDesc = typeDescription(f.type.returnType); 
+    must(f.type.returnType === VOID, `${expectedTypeDesc} should be returned`, at)
   }
 
   function mustReturnSomething(f, at) {
@@ -197,10 +190,6 @@ export default function analyze(match) {
       mustNotAlreadyBeDeclared(id.sourceString, { at: id });
       context.add(id.sourceString, variable);
       return core.variableDeclaration(variable, initializer);
-    },
-
-    ReadOnly(_dollar) {
-      return _dollar.sourceString === '$';
     },
 
     type(_type) {
@@ -440,10 +429,23 @@ export default function analyze(match) {
       return core.binary(op, left, right, left.type)
     },
 
-    Exp4_negation(_op, exp) {
-      const operand = exp.rep()
-      mustHaveNumericType(operand, { at: exp })
-      return core.binary("-", core.int(0), operand, operand.type)
+    Exp4_unary(unaryOp, exp) {
+      const [op, operand] = [unaryOp.sourceString, exp.rep()]
+      let type
+      if (op === "-") {
+        mustHaveNumericType(operand, { at: exp })
+        type = operand.type
+      } else if (op === "!") {
+        mustHaveBooleanType(operand, { at: exp })
+        type = BOOLEAN
+      } else if (op === "random") {
+        mustHaveAnArrayType(operand, { at: exp })
+        type = operand.type.baseType
+      } else if (op === 'len') {
+        mustHaveAnArrayType(operand, { at: exp })
+        type = INT
+      }
+      return core.unary(op, operand, type)
     },
     
     // FunCall_say(say, _open, args, _close) {
@@ -502,18 +504,9 @@ export default function analyze(match) {
 
     Primary_subscript(exp1, _open, exp2, _close) {
       const [array, subscript] = [exp1.rep(), exp2.rep()]
-      console.log("array: ", array);
       mustHaveAnArrayType(array, { at: exp1 })
       mustHaveIntegerType(subscript, { at: exp2 })
       return core.subscript(array, subscript)
-    },
-
-    Primary_member(exp, dot, id) {
-      const object = exp.rep()
-      let structType
-      mustHaveMember(structType, id.sourceString, { at: id })
-      const field = structType.fields.find(f => f.name === id.sourceString)
-      return core.memberExpression(object, dot.sourceString, field)
     },
 
     Primary_call(exp, open, expList, _close) {

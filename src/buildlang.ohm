@@ -48,7 +48,7 @@ BuildLang {
     Exp3        = Exp3 ("*" | "/" | "%") Exp4                                -- binary
                 | Exp4
     Exp4        = Primary "**" Exp4                                          -- binary
-                | "-" Primary                                                -- negation
+                | ("-" | "!" | random | len) Primary                         -- unary
                 | Primary
     Primary     = true ~mut
                 | false ~mut
@@ -56,7 +56,6 @@ BuildLang {
                 | intlit ~mut
                 | Primary ("(" | "?(") ListOf<Exp, ","> ")" ~mut             -- call
               	| Primary ("[" | "?[") Exp "]"                               -- subscript
-                | Primary ("." | "?.") id                                    -- member
                 | stringlit ~mut
               	| id                                                         -- id
               	| TypeArray "(" ")" ~mut                                     -- emptyarray
@@ -80,6 +79,8 @@ BuildLang {
     while       = "while" ~alnum
     for         = "for" ~alnum
     async       = "async" ~alnum
+    random      = "random" ~alnum
+    len        = "len" ~alnum
     block       = "block" ~alnum
     send        = "send" ~alnum
     sends       = "sends" ~alnum
@@ -93,7 +94,7 @@ BuildLang {
     true        = "true" ~alnum
     false 	    = "false" ~alnum
     keyword	    = break | if | else | while // | say
-                | async | block | send | sends | stack | for | in 
+                | len | random | async | block | send | sends | stack | for | in 
                 | int | float | string | bool | void | true | false
 
     indent      =  "⇨"
