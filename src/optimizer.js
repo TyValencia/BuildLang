@@ -35,10 +35,6 @@ const optimizers = {
     d.initializer = optimize(d.initializer)
     return d
   },
-  TypeDeclaration(d) {
-    d.type = optimize(d.type)
-    return d
-  },
   FunctionDeclaration(d) {
     d.fun = optimize(d.fun)
     if (d.body) d.body = d.body.flatMap(optimize)
@@ -133,25 +129,11 @@ const optimizers = {
     }
     return s
   },
-  Conditional(e) {
-    e.test = optimize(e.test)
-    e.consequent = optimize(e.consequent)
-    e.alternate = optimize(e.alternate)
-    if (e.test.constructor === Boolean) {
-      return e.test ? e.consequent : e.alternate
-    }
-    return e
-  },
   BinaryExpression(e) {
     e.op = optimize(e.op)
     e.left = optimize(e.left)
     e.right = optimize(e.right)
-    if (e.op === "??") {
-      // Coalesce Empty Optional Unwraps
-      // if (e.left?.kind === "EmptyOptional") {
-      //   return e.right
-      // }
-    } else if (e.op === "&&") {
+    if (e.op === "&&") {
       // Optimize boolean constants in && and ||
       if (e.left === true) return e.right
       else if (e.right === true) return e.left
@@ -205,16 +187,7 @@ const optimizers = {
     e.elements = e.elements.map(optimize)
     return e
   },
-  MemberExpression(e) {
-    e.object = optimize(e.object)
-    return e
-  },
   FunctionCall(c) {
-    c.callee = optimize(c.callee)
-    c.args = c.args.map(optimize)
-    return c
-  },
-  ConstructorCall(c) {
     c.callee = optimize(c.callee)
     c.args = c.args.map(optimize)
     return c
