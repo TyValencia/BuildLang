@@ -24,7 +24,24 @@ const fixtures = [
   },
   // {
   //   name: "if",
-  //   source: `int x = 0 if (x == 0): say("1") if (x == 0): say(1) else: say(2) if (x == 0): say(1) else if (x == 2): say(3) if (x == 0): say(1) else if (x == 2): say(3) else: say(4)`,
+  //   source: 
+  //   `int x = 0
+  //   if (x == 0): 
+  //       say("1") 
+  //   if (x == 0): 
+  //       say(1) 
+  //   else: 
+  //       say(2) 
+  //   if (x == 0): 
+  //       say(1) 
+  //   else if (x == 2): 
+  //       say(3) 
+  //   if (x == 0): 
+  //       say(1) 
+  //   else if (x == 2): 
+  //       say(3) 
+  //   else: 
+  //       say(4)`,
   //   expected: dedent`
   //     let x_1 = 0;
   //     if ((x_1 === 0)) {

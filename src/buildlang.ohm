@@ -3,7 +3,8 @@ BuildLang {
 
     Stmt        = VarDecl
                 | FunDecl
-                //| FunCall
+                | LeftPipe
+                | RightPipe
                 | Primary_call
                 | Assignment
                 | Primary ("++" | "--")                                      -- bump
@@ -22,10 +23,8 @@ BuildLang {
     TypeArray   = ("[")* type ("]")* 
     Assignment  = NonemptyListOf<id, ","> "=" NonemptyListOf<Exp, ",">       -- multipleAssignment
                 | Primary "=" Exp                                            -- assignment
-    // FunCall     = say "(" Args ")"                                           -- say
-    //             | ((say | id) "<|")+ PrimaryList                             -- left_pipe_forward
-    //             | PrimaryList ("|>" (say | id))+                             -- right_pipe_forward
-    //             | id "(" Args ")"                                            -- function_call
+    LeftPipe    = (id "<|")+ PrimaryList 
+    RightPipe   = PrimaryList ("|>" id)+ 
     PrimaryList = NonemptyListOf<Primary, ",">
     Args        = ListOf<Exp, ",">                                           -- args
     IfStmt      = if Exp ":" StmtBlock else ":" StmtBlock                    -- long
@@ -72,7 +71,6 @@ BuildLang {
     hex         = hexDigit
     mut         = ~"==" "=" | "++" | "--"
 
-    // say         = "say" ~alnum
     break       = "break" ~alnum
     if          = "if" ~alnum
     else       	= "else" ~alnum
@@ -93,7 +91,7 @@ BuildLang {
     void        = "void" ~alnum
     true        = "true" ~alnum
     false 	    = "false" ~alnum
-    keyword	    = break | if | else | while // | say
+    keyword	    = break | if | else | while 
                 | len | random | async | block | send | sends | stack | for | in 
                 | int | float | string | bool | void | true | false
 

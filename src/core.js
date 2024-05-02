@@ -111,13 +111,13 @@ export function program(statements) {
     return operations; 
 }
 
-  // export function left_pipe_forward(callee, args) {
-  //   return { kind: "LeftPipeForward", callee, args }
-  // }
+  export function left_pipe_forward(callee, args) {
+    return { kind: "LeftPipeForward", callee, args }
+  }
   
-  // export function right_pipe_forward(args, callee) {
-  //   return { kind: "RightPipeForward", args, callee }
-  // }
+  export function right_pipe_forward(args, callee) {
+    return { kind: "RightPipeForward", args, callee }
+  }
   
   
   // These local constants are used to simplify the standard library definitions.

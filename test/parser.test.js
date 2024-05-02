@@ -48,16 +48,16 @@ const syntaxChecks = [
   ["random used like a function", "say(random [1, 2] )", /Line 1, col 12/], 
   ["blank line", "say(1)\n\n\nsay(2)"], // preparser tests
   ["blank lines at end of source", "say(1)\n\n\n"], // preparser tests
-  // ["basic pipe-forward", "5 |> say"],
-  // ["basic pipe-backward", "say <| 10"],
-  // [
-  //   "pipe-forward with function call",
-  //   "block square(int x) sends int: \n send x * x \n 4 |> square",
-  // ],
-  // [
-  //   "pipe-forward with multiple inputs",
-  //   "block multiply(int x, int y) sends int: \n send x * y \n 3, 5 |> multiply",
-  // ],
+  ["basic pipe-forward", "5 |> say"],
+  ["basic pipe-backward", "say <| 10"],
+  [
+    "pipe-forward with function call",
+    "block square(int x) sends int:\nsend x * x\n4 |> square",
+  ],
+  [
+    "pipe-forward with multiple inputs",
+    "block multiply(int x, int y) sends int:\nsend x * y\n3, 5 |> multiply",
+  ],
 ];
 
 const syntaxErrors = [

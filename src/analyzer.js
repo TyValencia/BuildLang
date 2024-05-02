@@ -203,16 +203,18 @@ export default function analyze(match) {
       const params = parameters.rep();
       const paramTypes = params.map(param => param.type);
     
-      const returnTypeRep = type.rep()?.[0] ?? core.voidType; //[0]?.type if readOnly in type 
+      const returnTypeRep = type.rep()?.[0] ?? core.voidType; 
 
       fun.type = core.functionType(paramTypes, returnTypeRep);
     
       context.add(id.sourceString, fun);
-    
       context = context.newChildContext({ function: fun });
+
+      params.forEach(param => { // Adds parameters to the context
+        context.add(param.name, { type: param.type, kind: 'Parameter' });
+      });
     
       const body = stmtBlock.rep();
-    
       context = context.parent;
     
       return core.functionDeclaration(fun, params, body);
@@ -233,18 +235,14 @@ export default function analyze(match) {
     ListOf(children) {
       return children.asIteration().children.map(child => child.rep());
     },
-    
-    // NonemptyListOf(_open, children, _close) {
-    //   return children.asIteration().children.map(child => child.rep());
-    // },
+
+    NonemptyListOf(_open, children, _close) {
+      return children.asIteration().children.map(child => child.rep());
+    },
 
     TypeArray(_left, baseType, _right) { 
       return core.arrayType(baseType.rep())
     },
-
-    // Args(args) {
-    //   return args.children.map(child => child.rep());
-    // },
 
     Assignment_assignment(variable, _eq, expression) {
       const source = expression.rep()
@@ -447,45 +445,39 @@ export default function analyze(match) {
       }
       return core.unary(op, operand, type)
     },
+
+    LeftPipe(calleeList, _pipe, primaryList) {
+      const args = primaryList.rep()
+      const funs = calleeList.children.map(callee => callee.rep());
+      funs.forEach(fun => mustBeCallable(fun, { at: calleeList }))
+      mustHaveCorrectArgumentCount(args.length, funs[funs.length - 1].type.paramTypes.length, { at: calleeList })
+      args.forEach((arg, i) => mustBeAssignable(arg, { toType: funs[funs.length - 1].type.paramTypes[i] }, { at: calleeList }))
+      return funs.reduceRight((result, fun) => core.left_pipe_forward(fun, [result]), args[0])
+    },
     
-    // FunCall_say(say, _open, args, _close) {
-    //   console.log("FunCall_say triggered"); 
-    //   const sayFunction = this.lookup('say');
-    //   if (!sayFunction) {
-    //       throw new Error("Function 'say' is not defined.");
-    //   }
-  
-    //   const argumentExpressions = args.rep();
-    //   return core.functionCall(sayFunction, argumentExpressions);
-    // },
+    RightPipe(primaryList, _pipe, calleeList) {
+      const args = primaryList.rep()
+      const funs = calleeList.children.map(callee => callee.rep());
+      funs.forEach(fun => mustBeCallable(fun, { at: calleeList }))
+      mustHaveCorrectArgumentCount(args.length, funs[0].type.paramTypes.length, { at: calleeList })
+      args.forEach((arg, i) => mustBeAssignable(arg, { toType: funs[0].type.paramTypes[i] }, { at: calleeList }))
+      return funs.reduce((result, fun) => core.right_pipe_forward([result], fun), args[0])
+    },
 
-    // FunCall(callee) {
-    //   const args = callee.args.rep()
-    //   mustBeCallable(callee.callee, { at: callee })
-    //   mustHaveCorrectArgumentCount(args.length, callee.callee.type.paramTypes.length, { at: callee })
-    //   args.forEach((arg, i) => mustBeAssignable(arg, { toType: callee.callee.type.paramTypes[i] }, { at: callee }))
-    //   return core.functionCall(callee.callee, args)
-    // },
+    id(firstLetter, restOfName) {
+      const name = firstLetter.sourceString + restOfName.sourceString;
+      const entity = context.lookup(name);
+      if (!entity) {
+        throw new Error(`Identifier ${name} not declared`);
+      }
+      return entity; 
+    },
 
-    // FunCall_left_pipe_forward(calleeList, _pipe, primaryList) {
-    //   const args = primaryList.rep()
-    //   const funs = calleeList.asIteration().children.map(callee => callee.rep())
-    //   funs.forEach(fun => mustBeCallable(fun, { at: calleeList }))
-    //   mustHaveCorrectArgumentCount(args.length, funs[funs.length - 1].type.paramTypes.length, { at: calleeList })
-    //   args.forEach((arg, i) => mustBeAssignable(arg, { toType: funs[funs.length - 1].type.paramTypes[i] }, { at: calleeList }))
-    //   return funs.reduceRight((result, fun) => core.left_pipe_forward(fun, [result]), args[0])
-    // },
-    
-    // FunCall_right_pipe_forward(primaryList, _pipe, calleeList) {
-    //   const args = primaryList.rep()
-    //   const funs = calleeList.asIteration().children.map(callee => callee.rep())
-    //   funs.forEach(fun => mustBeCallable(fun, { at: calleeList }))
-    //   mustHaveCorrectArgumentCount(args.length, funs[0].type.paramTypes.length, { at: calleeList })
-    //   args.forEach((arg, i) => mustBeAssignable(arg, { toType: funs[0].type.paramTypes[i] }, { at: calleeList }))
-    //   return funs.reduce((result, fun) => core.right_pipe_forward([result], fun), args[0])
-    // },
+    PrimaryList(children) {
+      const results = children.asIteration().children.map(child => child.rep());
+      return results;
+    },
 
-    // Primary taken from Carlos' Exp9, should follow exact same format
     Primary_emptyarray(ty, _open, _close) {
       const type = ty.rep()
       mustBeAnArrayType(type, { at: ty })

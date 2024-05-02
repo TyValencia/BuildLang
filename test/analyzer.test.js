@@ -9,8 +9,6 @@ import {
   floatType,
 } from "../src/core.js";
 
-// Implement indent-specific checks, pipeline checks, and async checks
-
 // Programs that are semantically correct
 const semanticChecks = [
   ["basic assignment", "int x = 1"],
@@ -50,6 +48,16 @@ const semanticChecks = [
   ["blank lines at end of source", "say(1)\n\n\n"],
   ["negative number", "say(-1)"], 
   ["array length", "say(len[1,2,3])"], 
+  ["basic pipe-forward", "5 |> say"],
+  ["basic pipe-backward", "say <| 10"],
+  [
+    "pipe-forward with function call",
+    "block square(int x) sends int:\nsend x * x\n4 |> square",
+  ],
+  [
+    "pipe-forward with multiple inputs",
+    "block multiply(int x, int y) sends int:\nsend x * y\n3, 5 |> multiply",
+  ],
   // ["assign to array element", "int a = [1, 2, 3] a[1] = 100"], //**** 
 ];
 
@@ -98,7 +106,7 @@ const semanticErrors = [
   ["assignment to undeclared variable", 'x = 10', /Identifier x not declared/],
   ["function argument count mismatch", 'block f(int x): send block g(): f(1, 2)', /1 argument\(s\) required but 2 passed/],
   ["returning a value from a void-type function", 'block f(int x): send 1', /Cannot return a value from this function/],
-  ["type description in function call", 'block f(int x) sends int: bool x = true send x', /Cannot assign a bool to a int/],
+  ["type description in function call", 'block f(int x) sends int: x = true send x', /Cannot assign a bool to a int/],
   ["illegal whitespace error", 'int x = 1\n\tint y = 2', /Illegal whitespace character/], 
   ["indent error", 'int x = 1\n    int y = 2\n  int z = 3', /Indent Error/], 
   ["newline error", 'int x = 1 \n int y = 2', /Expected end of input/],
