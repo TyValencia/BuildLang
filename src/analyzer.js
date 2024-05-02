@@ -189,14 +189,23 @@ export default function analyze(match) {
       return core.program(statements.children.map(s => s.rep()))
     },
 
-    VarDecl(type, id, _eq, exp) {
-      const { type: baseType, readOnly } = type.rep();
+    VarDecl(readOnly, type, id, _eq, exp) {
       const initializer = exp.rep();
-      const variable = core.variable(id.sourceString, readOnly, baseType);
+      const baseType = type.rep();
+      const isReadOnly = readOnly.child(0) ? readOnly.child(0).sourceString === '$' : false; // Check if the readOnly symbol exists
+      const variable = core.variable(id.sourceString, isReadOnly, baseType);
       mustNotAlreadyBeDeclared(id.sourceString, { at: id });
       context.add(id.sourceString, variable);
       return core.variableDeclaration(variable, initializer);
-    },    
+    },
+
+    ReadOnly(_dollar) {
+      return _dollar.sourceString === '$';
+    },
+
+    type(_type) {
+      return _type.rep();
+    },
 
     FunDecl(async, _block, id, parameters, _sends, type, _colon, stmtBlock) {
       const fun = core.fun(id.sourceString);
@@ -205,7 +214,7 @@ export default function analyze(match) {
       const params = parameters.rep();
       const paramTypes = params.map(param => param.type);
     
-      const returnTypeRep = type.rep()?.[0]?.type ?? core.voidType; 
+      const returnTypeRep = type.rep()?.[0] ?? core.voidType; //[0]?.type if readOnly in type 
 
       fun.type = core.functionType(paramTypes, returnTypeRep);
     
@@ -247,6 +256,14 @@ export default function analyze(match) {
     // Args(args) {
     //   return args.children.map(child => child.rep());
     // },
+
+    Assignment_assignment(variable, _eq, expression) {
+      const source = expression.rep()
+      const target = variable.rep()
+      mustBeAssignable(source, { toType: target.type }, { at: variable })
+      mustNotBeReadOnly(target, { at: variable })
+      return core.assignment(target, source)
+    },
 
     Assignment_multipleAssignment(idList, _eq, expList) {
       const ids = idList.asIteration().children.map(id => id.sourceString);
@@ -485,6 +502,7 @@ export default function analyze(match) {
 
     Primary_subscript(exp1, _open, exp2, _close) {
       const [array, subscript] = [exp1.rep(), exp2.rep()]
+      console.log("array: ", array);
       mustHaveAnArrayType(array, { at: exp1 })
       mustHaveIntegerType(subscript, { at: exp2 })
       return core.subscript(array, subscript)
@@ -529,13 +547,6 @@ export default function analyze(match) {
 
     false(_) {
       return false
-    },
-
-    type_read_only_symbol(dollar, actualType) {
-      return {
-        type: actualType.rep(),
-        readOnly: dollar.sourceString === '$'
-      };
     },
 
     int(_) {

@@ -21,7 +21,7 @@ const semanticChecks = [
   ["increment and decrement", "int x = 10 x-- x++"],
   ["initialize array", "int a = [1, 2, 3]"],
   ["assign arrays", "int a = [1] int b = [1]"],
-  // ["assign to array element", "int a = [1, 2, 3] a[1] = 100"],
+  ["assign to array element", "int a = [1, 2, 3] a[1] = 100"],
   ["return in nested if", "block f() sends float: if true: send(1.0) else: send(2.0)"],
   ["break in nested if", "while false: if true: break"],
   ["long if", "if true: say(1) else: say(3)"],
