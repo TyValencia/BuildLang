@@ -24,7 +24,7 @@ export function program(statements) {
   }
   
   export function fun(name, type) {
-    return { kind: "Function", name, type }
+    return { kind: "Function", name, type, sourceString: name }
   }
   
   export function arrayType(baseType) {

@@ -13,22 +13,59 @@ const VOID = core.voidType
 
 class Context {
   constructor({ parent = null, locals = new Map(), inLoop = false, function: f = null }) {
-    Object.assign(this, { parent, locals, inLoop, function: f })
+    this.parent = parent;
+    this.locals = locals;
+    this.inLoop = inLoop;
+    this.function = f;
+    this.scopeStack = [this.locals]; 
+  }
+  static root() {
+    const rootContext = new Context({
+      locals: new Map(Object.entries(core.standardLibrary))
+    });
+    rootContext.scopeStack = [rootContext.locals]; 
+    return rootContext;
   }
   add(name, entity) {
     this.locals.set(name, entity)
   }
   lookup(name) {
-    return this.locals.get(name) || this.parent?.lookup(name)
+    for (let i = this.scopeStack.length - 1; i >= 0; i--) {
+      if (this.scopeStack[i].has(name)) {
+        return this.scopeStack[i].get(name);
+      }
+    }
+    return this.parent?.lookup(name);
+  }
+  pushNewScope() {
+    this.scopeStack.push(new Map());
+  }
+  popScope() {
+      if (this.scopeStack.length > 1) {
+          this.scopeStack.pop();
+      } else {
+          console.error("Attempt to pop global scope prevented.");
+      }
   }
   static root() {
     return new Context({ locals: new Map(Object.entries(core.standardLibrary)) })
   }
   newChildContext(props) {
-    return new Context({ ...this, ...props, parent: this, locals: new Map() })
-  }
+    if (!this) {
+        console.error("Context 'this' is not defined in newChildContext");
+        throw new Error("Context 'this' is not defined in newChildContext");
+    }
+    const child = new Context({
+        parent: this,
+        locals: new Map(),
+        inLoop: this?.inLoop ?? props.inLoop, // Safely inheriting inLoop
+        function: this?.function ?? props?.function // Safely inheriting function
+    });
+    return child;
 }
 
+
+}
 export default function analyze(match) {
   let context = Context.root()
 
@@ -146,12 +183,12 @@ export default function analyze(match) {
   }
 
   function mustBeInLoop(at) {
-    must(context.inLoop, "Break can only appear in a loop", at)
+    must(context?.inLoop, "Break can only appear in a loop", at)
   }
 
   function mustBeInAFunction(at) {
-    must(context.function, "Return can only appear in a function", at)
-  }
+    must(context?.function, "Return can only appear in a function", at);
+}
 
   function mustBeCallable(e, at) {
     const callable = e?.kind === "StructType" || e.type?.kind === "FunctionType"
@@ -199,25 +236,35 @@ export default function analyze(match) {
     FunDecl(async, _block, id, parameters, _sends, type, _colon, stmtBlock) {
       const fun = core.fun(id.sourceString);
       mustNotAlreadyBeDeclared(id.sourceString, { at: id });
-    
+  
       const params = parameters.rep();
       const paramTypes = params.map(param => param.type);
-    
-      const returnTypeRep = type.rep()?.[0] ?? core.voidType; 
-
+      const returnTypeRep = type.rep()?.[0] ?? core.voidType;
       fun.type = core.functionType(paramTypes, returnTypeRep);
-    
+  
       context.add(id.sourceString, fun);
-      context = context.newChildContext({ function: fun });
-
-      params.forEach(param => { // Adds parameters to the context
-        context.add(param.name, { type: param.type, kind: 'Parameter' });
+      context = context.newChildContext({ function: fun }); 
+      context.pushNewScope();
+  
+      params.forEach(param => {
+          context.add(param.name, { type: param.type, kind: 'Parameter' });
       });
-    
+  
       const body = stmtBlock.rep();
+  
+      context.popScope();
       context = context.parent;
-    
       return core.functionDeclaration(fun, params, body);
+  },  
+  
+  StmtBlock(_indent, statements, _dedent) {
+    context.pushNewScope();
+    try {
+        const results = statements.children.map(statement => statement.rep());
+        return results;
+    } finally {
+        context.popScope();
+    }
     },
     
     Param(type, id) {
@@ -292,10 +339,6 @@ export default function analyze(match) {
       mustBeInAFunction({ at: returnKeyword })
       mustNotReturnAnything(context.function, { at: returnKeyword })
       return core.shortReturnStatement()
-    },
-    
-    StmtBlock(statements) {
-      return statements.children.map(stmt => stmt.rep());
     },
     
     IfStmt_long(_if, exp, _colon1, block1, _else, _colon2, block2) {

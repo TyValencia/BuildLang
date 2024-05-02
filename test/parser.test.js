@@ -24,8 +24,21 @@ const syntaxChecks = [
   ["call in statement", "f(100)"],
   ["call in statement after func decl", "block f(int x): \nsay(5) \nf(100)"],
   ["call in exp", "say(5 * f(x, y, 2 * y))"],
-  ["short if", "if true: \nsay(1)"],
-  ["longer if", "if true:\nsay(1)\nelse:\nsay(1)"], // 47-49
+  [
+    "short if", 
+    [
+      "if true:",
+      "  say(1)",
+    ].join('\n'),],
+  [
+    "longer if",
+    [
+      "if true:",
+      "  say(1)",
+      "else:",
+      "  say(1)",
+    ].join('\n'),
+  ], 
   ["ors can be chained", "say(1 || 2 || 3 || 4 || 5)"],
   ["ands can be chained", "say(1 && 2 && 3 && 4 && 5)"],
   ["relational operators", "say(1<2||1<=2||1==2||1!=2||1>=2||1>2)"],

@@ -17,7 +17,7 @@ BuildLang {
     VarDecl     = ReadOnly? type id "=" Exp
     ReadOnly    = "$"
     type        = (int | float | string | bool | void)
-    FunDecl     = (async)? block id Params (sends type)? ":" Stmt*
+    FunDecl     = (async)? block id Params (sends type)? ":" StmtBlock*
     Params      = "(" ListOf<Param, ","> ")"
     Param       = (type | TypeArray) id
     TypeArray   = ("[")* type ("]")* 
@@ -35,7 +35,7 @@ BuildLang {
                 | for id in intlit ("..." | "..<") intlit ":" StmtBlock      -- range
                 | for id in Exp ":" StmtBlock                                -- collection
 
-    StmtBlock   = Stmt+
+    StmtBlock   = indent Stmt+ dedent
     
     Exp         = Exp1 ("||" Exp1)+                                          -- or
                 | Exp1 ("&&" Exp1)+                                          -- and

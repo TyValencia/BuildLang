@@ -37,7 +37,7 @@ export default function generate(program) {
       output.push(`let ${gen(d.variable)} = ${gen(d.initializer)};`)
     },
     FunctionDeclaration(d) {
-      output.push(`function ${gen(d.fun)}(${d.params.map(gen).join(", ")}) {`)
+      output.push(`function ${gen(d.fun)}(${d.params.map(param => targetName(param)).join(", ")}) {`);
       d.body.forEach(gen)
       output.push("}")
     },
@@ -65,6 +65,16 @@ export default function generate(program) {
     },
     ShortReturnStatement(s) {
       output.push("return;")
+    },
+    LeftPipeForward(e) {
+      const args = e.args.map(gen).join(", ");
+      const callee = gen(e.callee);
+      return `${callee}(${args})`;
+    },
+    RightPipeForward(e) {
+      const args = e.args.map(gen).join(", ");
+      const callee = gen(e.callee);
+      return `${callee}(${args})`;
     },
     IfStatement(s) {
       output.push(`if (${gen(s.test)}) {`)
