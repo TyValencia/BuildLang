@@ -21,14 +21,11 @@ const and = (...c) => c.reduce((x, y) => core.binary("&&", x, y))
 const less = (x, y) => core.binary("<", x, y)
 const eq = (x, y) => core.binary("==", x, y)
 const times = (x, y) => core.binary("*", x, y)
-// const neg = x => core.unary("-", x)
+const neg = x => core.unary("-", x)
 const array = (...elements) => core.arrayExpression(elements)
 const assign = (v, e) => core.assignment(v, e)
 const emptyArray = core.emptyArray(core.intType)
 const sub = (a, e) => core.subscript(a, e)
-const unwrapElse = (o, e) => core.binary("??", o, e)
-// const emptyOptional = core.emptyOptional(core.intType)
-// const some = x => core.unary("some", x)
 const program = core.program
 
 const tests = [
@@ -51,9 +48,9 @@ const tests = [
   ["optimizes 0*", core.binary("*", 0, x), 0],
   ["optimizes 0/", core.binary("/", 0, x), 0],
   ["optimizes 0+", core.binary("+", 0, x), x],
-  // ["optimizes 0-", core.binary("-", 0, x), neg(x)],
+  ["optimizes 0-", core.binary("-", 0, x), neg(x)],
   ["optimizes 1*", core.binary("*", 1, x), x],
-  // ["folds negation", core.unary("-", 8), -8],
+  ["folds negation", core.unary("-", 8), -8],
   ["optimizes 1**", core.binary("**", 1, x), 1],
   ["optimizes **0", core.binary("**", x, 0), 1],
   ["removes left false from ||", or(false, less(x, 1)), less(x, 1)],
@@ -72,39 +69,34 @@ const tests = [
   ["optimizes for-range", core.forRangeStatement(x, 5, "...", 3, [xpp]), []],
   ["optimizes for-empty-array", core.forStatement(x, emptyArray, [xpp]), []],
   ["applies if-false after folding", core.shortIfStatement(eq(1, 1), [xpp]), [xpp]],
-  // ["optimizes away nil", unwrapElse(emptyOptional, 3), 3],
-  // ["optimizes left conditional true", core.conditional(true, 55, 89), 55],
-  // ["optimizes left conditional false", core.conditional(false, 55, 89), 89],
   ["optimizes in functions", program([intFun(return1p1)]), program([intFun(return2)])],
   ["optimizes in subscripts", sub(a, onePlusTwo), sub(a, 3)],
   ["optimizes in array literals", array(0, onePlusTwo, 9), array(0, 3, 9)],
   ["optimizes in arguments", callIdentity([times(3, 5)]), callIdentity([15])],
-  // ["optimizes unary negation of a number", core.unary("-", 10), -10],
-  // ["optimizes constructor call with no args", core.constructorCall(identity, []), core.constructorCall(identity, [])],
-  // ["optimizes constructor call arguments", core.constructorCall(identity, [core.binary("+", 5, 3)]), core.constructorCall(identity, [8])],
-  // ["passes through unary expression unchanged when operand is not a number", core.unary("-", core.variable("x", false, core.intType)), core.unary("-", core.variable("x", false, core.intType))],
-  // ["passes through conditional expression unchanged when test is not boolean", core.conditional(core.variable("x", false, core.boolType), 10, 20), core.conditional(core.variable("x", false, core.boolType), 10, 20)],
-  ["executes for loop normally when collection is not empty", core.forStatement(x, array(1, 2, 3), [core.increment(x)]), core.forStatement(x, array(1, 2, 3), [core.increment(x)])],
-  ["executes for-range loop normally when low <= high", core.forRangeStatement(x, 1, "..<", 5, [core.increment(x)]), core.forRangeStatement(x, 1, "..<", 5, [core.increment(x)])],
-  ["executes repeat loop normally when count > 0", core.repeatStatement(5, [core.increment(x)]), core.repeatStatement(5, [core.increment(x)])],
+  ["executes for loop normally", core.forStatement(x, array(1, 2, 3), [core.increment(x)]), core.forStatement(x, array(1, 2, 3), [core.increment(x)])],
+  ["executes for-range for low <= high", core.forRangeStatement(x, 1, "..<", 5, [core.increment(x)]), core.forRangeStatement(x, 1, "..<", 5, [core.increment(x)])],
+  ["executes repeat loop when count > 0", core.repeatStatement(5, [core.increment(x)]), core.repeatStatement(5, [core.increment(x)])],
   ["executes while loop normally when condition is true", core.whileStatement(true, [core.increment(x)]), core.whileStatement(true, [core.increment(x)])],
-  ["returns full if statement when condition is non-boolean", core.ifStatement(x, [core.increment(x)], [core.decrement(x)]), core.ifStatement(x, [core.increment(x)], [core.decrement(x)])],
-  ["returns full short if statement when condition is non-boolean", core.shortIfStatement(x, [core.increment(x)]), core.shortIfStatement(x, [core.increment(x)])],
+  ["returns if when condition is not boolean", core.ifStatement(x, [core.increment(x)], [core.decrement(x)]), core.ifStatement(x, [core.increment(x)], [core.decrement(x)])],
+  ["returns short if when condition is not boolean", core.shortIfStatement(x, [core.increment(x)]), core.shortIfStatement(x, [core.increment(x)])],
+  ["executes sequence of operations without change", core.sequence([core.increment(x), core.decrement(x)]), [core.increment(x), core.decrement(x)]],
+  ["passes through ShortReturnStatement unchanged", core.shortReturnStatement(), core.shortReturnStatement()],
+  ["optimizes nested IfStatement in alternate", core.ifStatement(x, [core.increment(x)], core.ifStatement(x, [core.decrement(x)], [core.increment(x)])), core.ifStatement(x, [core.increment(x)], core.ifStatement(x, [core.decrement(x)], [core.increment(x)]))],
+  ["optimizes expression in return statement", core.returnStatement(core.binary("+", core.binary("-", 5, 3), 2)), core.returnStatement(4)],
+  ["passes through BreakStatement unchanged", core.breakStatement, core.breakStatement],
+  ["passes through assignment when source and target differ", core.assignment(x, core.variable("y", false, core.intType)), core.assignment(x, core.variable("y", false, core.intType))],
+  ["optimizes variable and initializer in variable declaration", core.variableDeclaration(core.variable("x", false, core.intType), core.binary("+", 5, 3)), core.variableDeclaration(core.variable("x", false, core.intType), 8)],
+  ["optimizes unary negation of a number", core.unary("-", 10), -10],
+  ["passes through unary expression when non-numeric", core.unary("-", core.variable("x", false, core.intType)), core.unary("-", core.variable("x", false, core.intType))],
   [
     "passes through nonoptimizable constructs",
     ...Array(2).fill([
       core.program([core.shortReturnStatement()]),
       core.variableDeclaration("x", true, "z"),
-      // core.typeDeclaration([core.field("x", core.intType)]),
       core.assignment(x, core.binary("*", x, "z")),
-      // core.assignment(x, core.unary("not", x)),
-      // core.constructorCall(identity, core.memberExpression(x, ".", "f")),
       core.variableDeclaration("q", false, core.emptyArray(core.floatType)),
-      // core.variableDeclaration("r", false, core.emptyOptional(core.intType)),
       core.whileStatement(true, [core.breakStatement]),
       core.repeatStatement(5, [core.returnStatement(1)]),
-      // core.conditional(x, 1, 2),
-      // unwrapElse(some(x), 7),
       core.ifStatement(x, [], []),
       core.shortIfStatement(x, []),
       core.forRangeStatement(x, 2, "..<", 5, []),

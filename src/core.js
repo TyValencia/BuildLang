@@ -85,6 +85,10 @@ export function program(statements) {
     return { kind: "BinaryExpression", op, left, right, type }
   }
   
+  export function unary(op, operand, type) {
+    return { kind: "UnaryExpression", op, operand, type }
+  }
+
   export function subscript(array, index) {
     return { kind: "SubscriptExpression", array, index, type: array.type.baseType }
   }
@@ -95,10 +99,6 @@ export function program(statements) {
   
   export function emptyArray(type) {
     return { kind: "EmptyArray", type }
-  }
-  
-  export function memberExpression(object, op, field) {
-    return { kind: "MemberExpression", object, op, field, type: field.type }
   }
   
   export function functionCall(callee, args) {
