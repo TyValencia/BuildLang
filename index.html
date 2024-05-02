@@ -1,21 +1,23 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>BuildLang</title>
-    <link rel="icon" href="docs/buildlanglogo.png" type="image/x-icon"/>
+    <link rel="stylesheet" href="buildlang.css" />
+    <link rel="icon" href="docs/logo.png" type="image/x-icon"/>
   </head>
 
   <body>
-    <a href="https://github.com/TyValencia/BuildLang">
-      <img
-        src="/docs/buildlanglogo.png"
-        alt="BuildLang Logo"
-        width="400"
-        height="400"
-      />
-    </a>
-    <h1>BuildLang</h1>
+    <div class = "header">
+       <img src="docs/logo.png" alt="BuildLang Logo" width="130" height="130">
+        <h1>BuildLang</h1>
+    </div>
+
+    <div class="container">
+    <h2>About</h2>
+
     <p>
       A block-based language that builds off the simplicity of Python but has
       advanced functionality and is even easier to read! This language is good
@@ -25,8 +27,10 @@
       more advanced. As a conglomerate of interesting coding techniques, it can
       serve as a powerful tool for those who know how to use them.
     </p>
+    </div>
 
-    <p>Features:</p>
+    <div class="container">
+    <h2>Features</h2>
     <ul>
       <li>
         Blocks (functions) can be easily connected each other in an intuitive
@@ -43,8 +47,10 @@
       Link to Github
       <a href="https://github.com/TyValencia/BuildLang">here</a>.
     </p>
-    <p>Code Examples</p>
-    <div id="code examples">
+  </div>
+    <div class="container">
+    <h2>Code Examples</h2>
+    <div id="code-examples">
       <h3>Fibonacci Sequence</h3>
 
       <table>
@@ -176,9 +182,9 @@ msgs()</code></pre>
           </td>
 
 
-    <h3>Optionals</h3>
 
       <table>
+        <h3>Optionals</h3>
         <tr>
           <th>Python</th>
           <th>BuildLang</th>
@@ -187,7 +193,8 @@ msgs()</code></pre>
           <td>
             <pre><code>def find_user(username):
     if username == "ty":
-        return {"username": "ty", "email": "ty@lion.lmu.edu"}
+        return {"username": "ty", "email": 
+        "ty@lion.lmu.edu"}
     else:
         return None
 
@@ -201,9 +208,11 @@ if __name__ = __main__:
           <td>
             <pre><code>block find_user(string username) sends user?:
   if username == "ty":
-    send user(username: "ty", email: "ty@lion.lmu.edu")
+    send user(username: "ty", email: 
+    "ty@lion.lmu.edu")
 
-// since find_user is an optional, if no value is sent, None will automatically be sent
+// since find_user is an optional, if no 
+// value is sent, None will automatically be sent
 user = find_user("ty")
 ifExists user then:
     say(user.email)
@@ -212,20 +221,15 @@ else:
           </td>
         </tr>
       </table>
-
+    </div>
   
-
-    <h2>Developer Bios</h2>
-    <div id="row">
+    <div class="container">
       <div class="bio">
-        <h4>Ty Valencia</h4>
+        <h2>Developer Bios</h2>
         <p>
           Ty Valencia is a senior Computer Science major at Loyola Marymount
           University.
         </p>
-      </div>
-      <div class="bio">
-        <h4>Christine Li</h4>
         <p>
           Christine Li is a junior Computer Science and Psychology double major
           at Loyola Marymount University.
