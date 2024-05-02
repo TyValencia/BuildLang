@@ -13,9 +13,10 @@ BuildLang {
                 | send Exp                                                   -- return
                 | send                                                       -- shortreturn
 
-    VarDecl     = type id "=" Exp 
-    type        = ("$")? (int | float | string | bool | void)                -- read_only_symbol
-    FunDecl     = (async)? block id Params (sends TypeArray)? ":" (StmtBlock)?
+    VarDecl     = ReadOnly? type id "=" Exp
+    ReadOnly    = "$"
+    type        = (int | float | string | bool | void)
+    FunDecl     = (async)? block id Params (sends type)? ":" Stmt*
     Params      = "(" ListOf<Param, ","> ")"
     Param       = (type | TypeArray) id
     TypeArray   = ("[")* type ("]")* 
@@ -91,7 +92,7 @@ BuildLang {
     void        = "void" ~alnum
     true        = "true" ~alnum
     false 	    = "false" ~alnum
-    keyword	    = break | if | else | while  
+    keyword	    = break | if | else | while // | say
                 | async | block | send | sends | stack | for | in 
                 | int | float | string | bool | void | true | false
 

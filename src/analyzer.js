@@ -12,31 +12,20 @@ const ANY = core.anyType
 const VOID = core.voidType
 
 class Context {
-  constructor({ parent = null, locals = new Map(), inLoop = false, currentFunction = null }) {
-    this.parent = parent;
-    this.locals = locals;
-    this.inLoop = inLoop;
-    this.currentFunction = currentFunction; 
+  constructor({ parent = null, locals = new Map(), inLoop = false, function: f = null }) {
+    Object.assign(this, { parent, locals, inLoop, function: f })
   }
-
   add(name, entity) {
-    this.locals.set(name, entity);
+    this.locals.set(name, entity)
   }
-
   lookup(name) {
-    return this.locals.get(name) || this.parent?.lookup(name);
+    return this.locals.get(name) || this.parent?.lookup(name)
   }
-
   static root() {
-    return new Context({ locals: new Map(Object.entries(core.standardLibrary)) });
+    return new Context({ locals: new Map(Object.entries(core.standardLibrary)) })
   }
-
   newChildContext(props) {
-    return new Context({ ...this, ...props, parent: this, locals: new Map() });
-  }
-
-  getCurrentFunction() {
-    return this.currentFunction || this.parent?.getCurrentFunction();
+    return new Context({ ...this, ...props, parent: this, locals: new Map() })
   }
 }
 
@@ -140,18 +129,12 @@ export default function analyze(match) {
         return "bool"
       case "VoidType":
         return "void"
-      case "AnyType":
-        return "any"
-      case "StructType":
-        return type.name
       case "FunctionType":
         const paramTypes = type.paramTypes.map(typeDescription).join(", ")
         const returnType = typeDescription(type.returnType)
         return `(${paramTypes})->${returnType}`
       case "ArrayType":
         return `[${typeDescription(type.baseType)}]`
-      case "OptionalType":
-        return `${typeDescription(type.baseType)}?`
     }
   }
 
@@ -164,11 +147,6 @@ export default function analyze(match) {
 
   function mustNotBeReadOnly(e, at) {
     must(!e.readOnly, `Cannot assign to constant ${e.name}`, at)
-  }
-
-  function mustHaveDistinctFields(type, at) {
-    const fieldNames = new Set(type.fields.map(f => f.name))
-    must(fieldNames.size === type.fields.length, "Fields must be distinct", at)
   }
 
   function mustHaveMember(structType, field, at) {
@@ -211,14 +189,23 @@ export default function analyze(match) {
       return core.program(statements.children.map(s => s.rep()))
     },
 
-    VarDecl(type, id, _eq, exp) {
-      const { type: baseType, readOnly } = type.rep();
+    VarDecl(readOnly, type, id, _eq, exp) {
       const initializer = exp.rep();
-      const variable = core.variable(id.sourceString, readOnly, baseType);
+      const baseType = type.rep();
+      const isReadOnly = readOnly.child(0) ? readOnly.child(0).sourceString === '$' : false; // Check if the readOnly symbol exists
+      const variable = core.variable(id.sourceString, isReadOnly, baseType);
       mustNotAlreadyBeDeclared(id.sourceString, { at: id });
       context.add(id.sourceString, variable);
       return core.variableDeclaration(variable, initializer);
-    },    
+    },
+
+    ReadOnly(_dollar) {
+      return _dollar.sourceString === '$';
+    },
+
+    type(_type) {
+      return _type.rep();
+    },
 
     FunDecl(async, _block, id, parameters, _sends, type, _colon, stmtBlock) {
       const fun = core.fun(id.sourceString);
@@ -227,21 +214,17 @@ export default function analyze(match) {
       const params = parameters.rep();
       const paramTypes = params.map(param => param.type);
     
-      const returnTypeRep = type.rep();
+      const returnTypeRep = type.rep()?.[0] ?? core.voidType; //[0]?.type if readOnly in type 
+
       fun.type = core.functionType(paramTypes, returnTypeRep);
     
       context.add(id.sourceString, fun);
     
-      const functionContext = context.newChildContext({ currentFunction: fun });
+      context = context.newChildContext({ function: fun });
     
-      context = functionContext;
       const body = stmtBlock.rep();
     
-      context = functionContext.parent;
-    
-      console.log("Return type rep: ", returnTypeRep);
-      console.log("Function type set as: ", fun.type);
-      console.log("Context after restoring: ", context);
+      context = context.parent;
     
       return core.functionDeclaration(fun, params, body);
     },
@@ -262,24 +245,24 @@ export default function analyze(match) {
       return children.asIteration().children.map(child => child.rep());
     },
     
-    NonemptyListOf(_open, children, _close) {
-      return children.asIteration().children.map(child => child.rep());
-    },
+    // NonemptyListOf(_open, children, _close) {
+    //   return children.asIteration().children.map(child => child.rep());
+    // },
 
     TypeArray(_left, baseType, _right) { 
       return core.arrayType(baseType.rep())
     },
 
-    Args(args) {
-      return args.children.map(child => child.rep());
-    },
+    // Args(args) {
+    //   return args.children.map(child => child.rep());
+    // },
 
-    Assignment_assignment(id, _eq, expression) {
-      const variable = context.lookup(id.sourceString);
-      mustHaveBeenFound(variable, id.sourceString, { at: id }); 
-      const exprValue = expression.rep();
-      mustBeAssignable(exprValue, { toType: variable.type }, { at: id });
-      return core.assignment(variable, exprValue);
+    Assignment_assignment(variable, _eq, expression) {
+      const source = expression.rep()
+      const target = variable.rep()
+      mustBeAssignable(source, { toType: target.type }, { at: variable })
+      mustNotBeReadOnly(target, { at: variable })
+      return core.assignment(target, source)
     },
 
     Assignment_multipleAssignment(idList, _eq, expList) {
@@ -519,6 +502,7 @@ export default function analyze(match) {
 
     Primary_subscript(exp1, _open, exp2, _close) {
       const [array, subscript] = [exp1.rep(), exp2.rep()]
+      console.log("array: ", array);
       mustHaveAnArrayType(array, { at: exp1 })
       mustHaveIntegerType(subscript, { at: exp2 })
       return core.subscript(array, subscript)
@@ -565,13 +549,6 @@ export default function analyze(match) {
       return false
     },
 
-    type_read_only_symbol(dollar, actualType) {
-      return {
-        type: actualType.rep(),
-        readOnly: dollar.sourceString === '$'
-      };
-    },
-
     int(_) {
       return intType; 
     },
@@ -586,10 +563,6 @@ export default function analyze(match) {
 
     bool(_) {
       return boolType; 
-    },
-
-    void(_) {
-      return voidType; 
     },
 
     intlit(_digits) {

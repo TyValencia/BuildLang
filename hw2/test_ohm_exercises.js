@@ -1,5 +1,5 @@
 import assert from "assert"
-import { matches } from "../src/ohm_exercises.js"
+import { matches } from "./ohm_exercises.js"
 
 const testFixture = {
   canadianPostalCode: {

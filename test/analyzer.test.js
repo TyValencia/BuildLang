@@ -16,13 +16,13 @@ const semanticChecks = [
   ["basic assignment", "int x = 1"],
   ["print statement", "say(1)"],
   ["short return", "block f(): say(1)"],
-  // ["long return", "block f() sends bool: send true"],
+  ["long return", "block f() sends bool: send true"], // ****
   ["variable declarations", "int x = 1 bool y = false"],
   ["increment and decrement", "int x = 10 x-- x++"],
   ["initialize array", "int a = [1, 2, 3]"],
   ["assign arrays", "int a = [1] int b = [1]"],
-  // ["assign to array element", "int a = [1, 2, 3] a[1] = 100"],
-  // ["return in nested if", "block f() sends float: if true: send(1.0) else: send(2.0)"],
+  ["assign to array element", "int a = [1, 2, 3] a[1] = 100"],
+  ["return in nested if", "block f() sends float: if true: send(1.0) else: send(2.0)"],
   ["break in nested if", "while false: if true: break"],
   ["long if", "if true: say(1) else: say(3)"],
   ["elseif", "if true: say(1) else if true: say(0) else: say(3)"],
@@ -52,6 +52,10 @@ const semanticChecks = [
   // ["proper indenting", 'int x = 1\n  int y = 2'], 
   // ["function type creation", "block f(int x, bool y):"],
   ["comments", "int x = 1 // this is a comment"],
+  ["async function", "async block f(): say(1)"],
+  ["multiple tests", "int x = 1 int y = 2 x, y = 3, 4"],
+  ["empty array", "int a = [int]()"],
+  ["string test", 'string x = "hello"'],
 ];
 
 // Programs that are syntactically correct but have semantic errors
@@ -113,6 +117,7 @@ const semanticErrors = [
   ["indent error", 'int x = 1\n    int y = 2\n  int z = 3', /Indent Error/], 
   // ["multiple dedents", 'int x = 1\n  int y = 2\n    int z = 3\nint a = 4', /⇦/],
   // ["dedents at end", 'int x = 1\n  int y = 2\n    int z = 3', /⇦\n$/], 
+  ["newline error", 'int x = 1 \n int y = 2', /Expected end of input/], 
 ];
 
 describe("The analyzer", () => {
