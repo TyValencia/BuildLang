@@ -1,0 +1,51 @@
+@import url("https://fonts.googleapis.com/css2?family=Archivo+Black&family=Rajdhani:wght@500&family=Roboto+Mono:wght@700&display=swap");
+
+body {
+  margin: 0;
+  font-family: "Rajdhani", sans-serif;
+  background-color: #d0f1fe;
+  display: flex;
+  justify-content: left;
+  flex-direction: column;
+  padding-left: 10vw;
+  padding-right: 10vw;
+  font-size: 1.3em;
+}
+
+.container {
+  margin-top: 2vh;
+}
+
+#code-examples {
+  text-align: center;
+}
+
+table {
+  margin: auto;
+  border-collapse: collapse;
+  text-align: left;
+}
+th,
+td {
+  border: 1px solid black;
+  padding: 10px;
+  text-align: left;
+  background-color: #dff4fd;
+}
+
+.header {
+  display: flex;
+  justify-content: left;
+  align-items: center;
+  margin-top: 20px;
+}
+
+h1 {
+  padding-left: 40px;
+  font-size: 4em;
+}
+
+.bio {
+  margin-top: 5vh;
+  margin-bottom: 10vh;
+}
