@@ -1,6 +1,6 @@
 # BuildLang
 
-![Logo](docs/buildlanglogo.png)
+![Logo](docs/logo.png)
 
 ### by: Ty Valencia and Christine Li
 
