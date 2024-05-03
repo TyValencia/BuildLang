@@ -1,0 +1,8 @@
+float z = 0.5
+block f(float x, bool y):
+  say(sin(1.0) > π)
+  send
+block g() sends bool:
+  send false
+bool n = true
+z, n |> f |> g
