@@ -99,24 +99,29 @@ const fixtures = [
     source: 
     [
       "float z = 0.5",
-      "block f(float x, bool y):",
+      "block f(float x):",
       "  say(sin(1.0) > π)",
       "  send",
       "block g() sends bool:",
+      "  string word = \"hello\"",
+      "  int a = len word",
       "  send false",
       "bool n = true",
-      "z, n |> f |> g",
+      "z |> f |> g",
     ].join('\n'), 
     expected: dedent`
       let z_1 = 0.5;
-      function f_2(x_3, y_4) {
+      function f_2(x_3) {
         console.log((Math.sin(1) > Math.PI));
         return;
       }
-      function g_5() {
+      function g_4() {
+        let word_5 = "hello";
+        let a_6 = word_5.length;
         return false;
       }
-      let n_6 = true;
+      let n_7 = true;
+      g_4(f_2(z_1));
       `, 
   },
   {

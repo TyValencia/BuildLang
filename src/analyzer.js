@@ -483,8 +483,14 @@ export default function analyze(match) {
         mustHaveAnArrayType(operand, { at: exp })
         type = operand.type.baseType
       } else if (op === 'len') {
-        mustHaveAnArrayType(operand, { at: exp })
-        type = INT
+        if (operand.type.kind === "StringType") {
+          mustHaveNumericOrStringType(operand, { at: exp })
+          type = INT
+        }
+        else if (operand.type.kind === "ArrayType") {
+          mustHaveAnArrayType(operand, { at: exp })
+          type = INT
+        }
       }
       return core.unary(op, operand, type)
     },
@@ -608,4 +614,3 @@ export default function analyze(match) {
 
   return builder(match).rep()
 }
- 

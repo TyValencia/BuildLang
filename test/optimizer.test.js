@@ -27,6 +27,45 @@ const assign = (v, e) => core.assignment(v, e)
 const emptyArray = core.emptyArray(core.intType)
 const sub = (a, e) => core.subscript(a, e)
 const program = core.program
+const square = core.variable("square", false, core.functionType([core.intType], core.intType));
+const say = core.variable("say", false, core.functionType([core.anyType], core.voidType));
+
+// const tailRecursiveSum = core.functionDeclaration(
+//   "sum",
+//   core.fun("sum", core.functionType([core.intType], core.intType)),
+//   [core.variable("n", false, core.intType)],
+//   [
+//     core.ifStatement(
+//       core.binary("==", core.variable("n", false, core.intType), 0),
+//       [core.returnStatement(0)],
+//       [core.returnStatement(core.binary("+",
+//         core.variable("n", false, core.intType),
+//         core.functionCall(core.variable("sum", false, core.functionType([core.intType], core.intType)), [
+//           core.binary("-", core.variable("n", false, core.intType), 1)
+//         ])
+//       ))]
+//     )
+//   ]
+// );
+
+// const optimizedSum = core.functionDeclaration(
+//   "sum",
+//   core.fun("sum", core.functionType([core.intType], core.intType)),
+//   [core.variable("n", false, core.intType)],
+//   [
+//     core.variable("result", false, core.intType, 0),
+//     core.whileStatement(
+//       core.binary(">", core.variable("n", false, core.intType), 0),
+//       [
+//         core.assignment(core.variable("result", false, core.intType), 
+//           core.binary("+", core.variable("result", false, core.intType), core.variable("n", false, core.intType))),
+//         core.assignment(core.variable("n", false, core.intType),
+//           core.binary("-", core.variable("n", false, core.intType), 1))
+//       ]
+//     ),
+//     core.returnStatement(core.variable("result", false, core.intType))
+//   ]
+// );
 
 const tests = [
   ["folds +", core.binary("+", 5, 8), 13],
@@ -88,6 +127,11 @@ const tests = [
   ["optimizes variable and initializer in variable declaration", core.variableDeclaration(core.variable("x", false, core.intType), core.binary("+", 5, 3)), core.variableDeclaration(core.variable("x", false, core.intType), 8)],
   ["optimizes unary negation of a number", core.unary("-", 10), -10],
   ["passes through unary expression when non-numeric", core.unary("-", core.variable("x", false, core.intType)), core.unary("-", core.variable("x", false, core.intType))],
+  // ["transforms tail recursion into a loop for sum", tailRecursiveSum, optimizedSum],
+  ["optimizes right pipe with square function", core.right_pipe_forward([2], square), 4],
+  ["optimizes left pipe with square function", core.left_pipe_forward(square, [3]), 9],
+  ["passes right pipe with say function", core.right_pipe_forward([3], say), {kind: 'RightPipeForward', args: [3], callee: say}],
+  ["passes left pipe with say function", core.left_pipe_forward(say, [84]), {kind: 'LeftPipeForward', args: [84], callee: say}],
   [
     "passes through nonoptimizable constructs",
     ...Array(2).fill([

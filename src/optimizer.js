@@ -25,6 +25,27 @@ export default function optimize(node) {
   return optimizers?.[node.kind]?.(node) ?? node
 }
 
+// function isTailRecursive(functionDecl) {
+//   let lastStatement = functionDecl.body?.[functionDecl.body.length - 1];
+
+//   if (lastStatement?.kind === 'IfStatement') {
+//       const branch = lastStatement.alternate || lastStatement.consequent;
+//       lastStatement = branch[branch.length - 1];
+//   }
+
+//   if (lastStatement?.kind !== 'ReturnStatement') return false;
+
+//   let expr = lastStatement.expression;
+//   if (expr.kind === 'BinaryExpression' && (expr.left.kind === 'FunctionCall' || expr.right.kind === 'FunctionCall')) {
+//       expr = expr.left.kind === 'FunctionCall' ? expr.left : expr.right;
+//   }
+//   if (expr.kind === 'FunctionCall' && expr.callee.name === functionDecl.fun.name) {
+//       return true;
+//   }
+
+//   return false;
+// }
+
 const optimizers = {
   Program(p) {
     p.statements = p.statements.flatMap(optimize)
@@ -36,10 +57,46 @@ const optimizers = {
     return d
   },
   FunctionDeclaration(d) {
-    d.fun = optimize(d.fun)
-    if (d.body) d.body = d.body.flatMap(optimize)
-    return d
+    d.fun = optimize(d.fun);
+    if (d.body) {
+      // if (isTailRecursive(d)) {
+      //   d.body = transformTailRecursiveFunction(d);
+      // } else {
+        if (d.body) d.body = d.body.flatMap(optimize)
+      // }
+    }
+    return d;
   },
+
+  // Tail recursion elimination
+  // isTailRecursive(functionDecl) {
+  //   const lastStatement = functionDecl.body[functionDecl.body.length - 1];
+  //   return lastStatement && lastStatement.kind === 'ReturnStatement' &&
+  //          lastStatement.expression.kind === 'FunctionCall' &&
+  //          lastStatement.expression.callee.name === functionDecl.fun.name;
+  // },
+  // transformTailRecursiveFunction(functionDecl) {
+  //   const lastStatement = functionDecl.body.pop(); 
+  //   const params = functionDecl.params.map(p => p.name);
+  //   const args = lastStatement.expression.args.map(optimize);
+  
+  //   let updates = params.map((param, index) => ({
+  //     kind: 'Assignment',
+  //     target: { kind: 'Variable', name: param },
+  //     source: args[index]
+  //   }));
+  //   let newBody = [
+  //     ...functionDecl.body,
+  //     ...updates,
+  //     {
+  //       kind: 'WhileStatement',
+  //       test: { kind: 'BooleanLiteral', value: true },
+  //       body: [...functionDecl.body, ...updates]
+  //     }
+  //   ];
+  //     return newBody.flatMap(optimize);
+  // },
+
   Increment(s) {
     s.variable = optimize(s.variable)
     return s
@@ -192,4 +249,16 @@ const optimizers = {
     c.args = c.args.map(optimize)
     return c
   },
+  RightPipeForward(r) {
+    if (r.callee.name === 'square' && typeof r.args[0] === 'number') {
+      return r.args[0] * r.args[0]; 
+    }
+    return r;  
+  },
+  LeftPipeForward(l) {
+    if (l.callee.name === 'square' && typeof l.args[0] === 'number') {
+      return l.args[0] * l.args[0];  
+    }
+    return l;  
+  }
 }

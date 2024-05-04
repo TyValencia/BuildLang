@@ -66,13 +66,13 @@ export default function generate(program) {
     ShortReturnStatement(s) {
       output.push("return;")
     },
-    LeftPipeForward(e) {
-      const args = e.args.map(gen).join(", ");
+    LeftPipeForward: function(e) {
+      const args = e.args.map(arg => gen(arg)).join(", ");
       const callee = gen(e.callee);
       return `${callee}(${args})`;
     },
-    RightPipeForward(e) {
-      const args = e.args.map(gen).join(", ");
+    RightPipeForward: function(e) {
+      const args = e.args.map(arg => gen(arg)).join(", ");
       const callee = gen(e.callee);
       return `${callee}(${args})`;
     },
@@ -135,9 +135,6 @@ export default function generate(program) {
     ArrayExpression(e) {
       return `[${e.elements.map(gen).join(",")}]`
     },
-    EmptyArray(e) {
-      return "[]"
-    },
     MemberExpression(e) {
       const object = gen(e.object)
       const field = JSON.stringify(gen(e.field))
@@ -155,6 +152,10 @@ export default function generate(program) {
     },
   }
 
-  gen(program)
-  return output.join("\n")
+  program.statements.forEach(statement => {
+    const result = gen(statement);
+    if (result != "[object Object]") { // Skip pushing empty objects
+      output.push(result + ";");  // Push the result of each top-level statement (specific for pipelines)
+    }
+  });  return output.join("\n")
 }
