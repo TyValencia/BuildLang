@@ -216,7 +216,7 @@ else:
 - Variable used as a function
 - Decrementing/incrementing a non-integer value
 - Inconsistent indentation (mixing tabs and spaces)
-- Indenting outside of blaocks of code such as functions, loops, and conditional statements
+- Indenting outside of blocks of code such as functions, loops, and conditional statements
 
 ## Notes
 
