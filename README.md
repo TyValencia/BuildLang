@@ -2,8 +2,6 @@
 
 ![Logo](docs/buildlanglogo.png)
 
-### by: Ty Valencia and Christine Li
-
 ## Description
 
 A block-based language that builds off the simplicity of Python but has advanced functionality and is even easier to read! This language is good for beginners and advanced programmers alike. BuildLang is supposed to mimic assembling Lego bricks together so that it can bridge the gap for those looking to get into code. It also serves as a good basis as one gets more advanced. As a conglomerate of interesting coding techniques, it can serve as a powerful tool for those who know how to use them.
@@ -82,7 +80,7 @@ stack n:
 </td>
 </table>
 
-### Implementing Pipelines
+### Pipelines
 
 <table>
 <tr> <th>Python</th><th>BuildLang</th><tr>
@@ -119,7 +117,7 @@ z |> sinGreaterThanPi |> isTrue
 </td>
 </table>
 
-### Async Functions (can be implemented in the future)
+### Async Functions (to be implemented)
 
 <table>
 <tr> <th>Python</th><th>BuildLang</th><tr>
@@ -164,7 +162,7 @@ msgs()
 </td>
 </table>
 
-### Optionals (can be implemented in the future)
+### Optionals (to be implemented)
 
 <table>
 <tr> <th>Python</th><th>BuildLang</th><tr>
@@ -206,7 +204,23 @@ else:
 </td>
 </table>
 
+## List of Static Semantic Errors
+
+- Use of undeclared identifiers
+- Redeclaring a previously declared identifier
+- Wrong types for identifiers
+- Breaking outside of a loop
+- Returning outside of a function
+- Function called with incorrect number of arguments
+- Non-boolean conditionals
+- Variable used as a function
+- Decrementing/incrementing a non-integer value
+- Inconsistent indentation (mixing tabs and spaces)
+- Indenting outside of blaocks of code such as functions, loops, and conditional statements
+
 ## Notes
 
 Implemented Python indenting and dedenting, static typing, and pipeline operators  
 Stretch goals: async, optionals, SIMD, simple generators
+
+#### Authors: Ty Valencia and Christine Li
