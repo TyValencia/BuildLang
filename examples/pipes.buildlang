@@ -1,0 +1,8 @@
+block sinGreaterThanPi(float x) sends bool:
+  send sin(x) > π
+
+block isTrue(bool z) sends bool:
+  send z
+
+float z = 0.5
+z |> sinGreaterThanPi |> isTrue

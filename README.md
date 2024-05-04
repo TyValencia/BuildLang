@@ -8,20 +8,15 @@
 
 A block-based language that builds off the simplicity of Python but has advanced functionality and is even easier to read! This language is good for beginners and advanced programmers alike. BuildLang is supposed to mimic assembling Lego bricks together so that it can bridge the gap for those looking to get into code. It also serves as a good basis as one gets more advanced. As a conglomerate of interesting coding techniques, it can serve as a powerful tool for those who know how to use them.
 
-Github Page: https://github.com/TyValencia/BuildLang/deployments/github-pages
+Github Page: https://tyvalencia.github.io/BuildLang/
+[View our Grammar](https://github.com/TyValencia/BuildLang/blob/main/src/buildlang.ohm)
 
 ## Features
 
-- Blocks (functions) can be easily connected each other in an intuitive way through the pipe operator |> and <|
-- Type Inference makes it make it easier to interpret code
-- Optionals ? are borrowed from JavaScript's approach to handling nulls and errors
-- Async also borrowed from JavaScript
-
-## Stretch goals
-
-- Single Instruction, Multiple Data (SIMD) from Mojo
-- Simple generators from Mojo
-- Unique IDE - create a clean UI that makes it fun for kids to code (stretch goal)
+- Pipe operators easily connect blocks (functions)
+- Statically typed
+- Python indenting and dedenting
+- Stack simplifies counting loops
 
 ## Examples
 
@@ -64,7 +59,7 @@ next_number = num2
 count = 1
 
 for _ in range(n):
-    print(next_number, end=" ")
+    print(next_number)
     count += 1
     num1, num2 = num2, next_number
     next_number = num1 + num2
@@ -80,7 +75,7 @@ int num2 = 1
 int nextNumber = num2
 
 stack n:
-    say(nextNumber, " ")
+    say(nextNumber)
     num1, num2 = num2, nextNumber
     nextNumber = num1 + num2
 ```
@@ -97,41 +92,35 @@ stack n:
 <td>
 
 ```
-def multiply(num1, num2):
-	return num1 * num2
+def sin_greater_than_pi(x):
+    return math.sin(x) > math.pi
 
-def convert_binary(num):
-	binary_num = ""
-    while num > 0:
-        binary_num = str(num % 2) + binary_num
-        num = num // 2
-    return binary_num
+def is_true(z):
+    return z == True
 
-def main:
-	function2(function1(3, 5))
+def main():
+    z = 0.5
+    print(is_true(sin_greater_than_pi(z)))
 ```
 
 </td>
 <td>
 
 ```
-block multiply(int num1, int num2) sends int:
-    send num1 * num2
+block sinGreaterThanPi(float x) sends bool:
+  send sin(x) > π
 
-block convertBinary(int num) sends string:
-    binaryNum = ""
-    while num > 0:
-        binaryNum = str(num % 2) + binaryNum
-        num = math.floor(num / 2)
-    send binaryNum
+block isTrue(bool z) sends bool:
+  send z
 
-3, 5 |> multiply |> converyBinary
+float z = 0.5
+z |> sinGreaterThanPi |> isTrue
 ```
 
 </td>
 </table>
 
-### Async Functions
+### Async Functions (can be implemented in the future)
 
 <table>
 <tr> <th>Python</th><th>BuildLang</th><tr>
@@ -220,5 +209,5 @@ else:
 
 ## Notes
 
-Implemented Python indenting and dedenting, static typing, pipeline operators, and async
-To be implemented: optionals, SIMD, simple generators, and unique IDE
+Implemented Python indenting and dedenting, static typing, and pipeline operators
+Stretch goals: async, optionals, SIMD, simple generators

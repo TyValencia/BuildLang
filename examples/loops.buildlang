@@ -1,9 +1,10 @@
+// prints first 10 numbers of fibonacci sequence
 int n=10
 int num1 = 0
 int num2 = 1
 int nextNumber = num2
 
 stack n:
-    say(nextNumber, " ") 
+    say(nextNumber) 
     num1, num2 = num2, nextNumber
     nextNumber = num1 + num2

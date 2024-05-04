@@ -1,0 +1,9 @@
+// calculate the total number of 2x1 Lego bricks needed to build a wall
+block buildAWall(int height, int length) sends int:
+    if (length % 2 == 1):
+        say("Length of wall must be even")
+        send 0
+
+    int legosPerRow = length / 2
+    int legosNeeded = legosPerRow * height
+    send legosNeeded

@@ -31,7 +31,7 @@ BuildLang {
                 | if Exp ":" StmtBlock else IfStmt                           -- elseif
                 | if Exp ":" StmtBlock                                       -- short
     LoopStmt    = while Exp ":" StmtBlock                                    -- while
-                | stack intlit ":" StmtBlock                              	 -- repeat
+                | stack (intlit|id) ":" StmtBlock                              	 -- repeat
                 | for id in intlit ("..." | "..<") intlit ":" StmtBlock      -- range
                 | for id in Exp ":" StmtBlock                                -- collection
 
@@ -53,7 +53,7 @@ BuildLang {
                 | false ~mut
                 | floatlit ~mut
                 | intlit ~mut
-                | Primary ("(" | "?(") ListOf<Exp, ","> ")" ~mut             -- call
+                | id ("(" | "?(") ListOf<Exp, ","> ")" ~mut                  -- call
               	| Primary ("[" | "?[") Exp "]"                               -- subscript
                 | stringlit ~mut
               	| id                                                         -- id

@@ -6,12 +6,12 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>BuildLang</title>
     <link rel="stylesheet" href="buildlang.css" />
-    <link rel="icon" href="docs/logo.png" type="image/x-icon"/>
+    <link rel="icon" href="docs/buildlanglogo.png" type="image/x-icon"/>
   </head>
 
   <body>
     <div class = "header">
-       <img src="docs/logo.png" alt="BuildLang Logo" width="130" height="130">
+       <img src="docs/buildlanglogo.png" alt="BuildLang Logo" width="130" height="130">
         <h1>BuildLang</h1>
     </div>
 
@@ -33,19 +33,20 @@
     <h2>Features</h2>
     <ul>
       <li>
-        Blocks (functions) can be easily connected each other in an intuitive
-        way through the pipe operator
+        Pipe operators easily connect blocks (functions)
       </li>
-      <li>Type Inference makes it make it easier to interpret code</li>
+      <li>Statically typed</li>
       <li>
-        Optionals ? are borrowed from JavaScript's approach to handling nulls
-        and errors
+        Python indenting and dedenting
       </li>
-      <li>Async also borrowed from JavaScript</li>
+      <li>
+        Stack simplifies counting loops
+      </li>
     </ul>
     <p>
       Link to Github
       <a href="https://github.com/TyValencia/BuildLang">here</a>.
+      
     </p>
   </div>
     <div class="container">
@@ -113,37 +114,31 @@ stack n:
         </tr>
         <tr>
           <td>
-            <pre><code>def multiply(num1, num2):
-	return num1 * num2
+            <pre><code>def sin_greater_than_pi(x):
+    return math.sin(x) > math.pi
 
-def convert_binary(num):
-	binary_num = ""
-    while num > 0:
-        binary_num = str(num % 2) + binary_num
-        num = num // 2
-    return binary_num
+def is_true(z):
+    return z == True
 
-def main:
-	function2(function1(3, 5))</code></pre>
+def main():
+    z = 0.5
+    print(is_true(sin_greater_than_pi(z)))</code></pre>
           </td>
           <td>
-            <pre><code>block multiply(int num1, int num2) sends int:
-    send num1 * num2
+            <pre><code>block sinGreaterThanPi(float x) sends bool:
+  send sin(x) > π
 
-block convertBinary(int num) sends string:
-    binaryNum = ""
-    while num > 0:
-        binaryNum = str(num % 2) + binaryNum
-        num = math.floor(num / 2)
-    send binaryNum
+block isTrue(bool z) sends bool:
+  send z
 
-3, 5 |> multiply |> converyBinary</code></pre>
+float z = 0.5
+z |> sinGreaterThanPi |> isTrue</code></pre>
           </td>
         </tr>
       </table>
 
 
-      <h3>Async</h3>
+      <h3>Async (can be implemented in the future)</h3>
 
       <table>
         <tr>
@@ -184,7 +179,7 @@ msgs()</code></pre>
 
 
       <table>
-        <h3>Optionals</h3>
+        <h3>Optionals (can be implemented in the future)</h3>
         <tr>
           <th>Python</th>
           <th>BuildLang</th>

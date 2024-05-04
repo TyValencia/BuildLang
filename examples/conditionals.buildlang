@@ -1,0 +1,10 @@
+// determine whether a Lego brick fits in a given space
+float spaceWidth = 4.5
+float spaceLength = 8.7
+float legoWidth = 2.2
+float legoLength = 4.2
+
+if legoWidth <= spaceWidth && legoLength <= spaceLength:
+    say("The Lego brick fits!")
+else:
+    say("The Lego brick doesn't fit :(")
