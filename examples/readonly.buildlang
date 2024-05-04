@@ -1,0 +1,2 @@
+// read only variable
+$ string s = "don't modify me"
